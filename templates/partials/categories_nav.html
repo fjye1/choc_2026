@@ -1,0 +1,27 @@
+<div class="categories-bg-header">
+  <div class="categories-grid hide-under-900">
+    <div class="left-second-section" style="height: 30px;">
+      <ul class="nav mb-0">
+        {% for tag in left_tags %}
+<!--        TODO replace this with the route for Product-->
+        <li><a href="{{ url_for('products.product_test') }}?product={{ tag }}" class="nav-link px-2 link-body-emphasis">{{ tag }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="center-logo" style="height: 30px;"></div>
+
+    <div class="right-second-section" style="height: 30px;">
+      <ul class="nav mb-0">
+        {% for tag in right_tags %}
+<!--        TODO replace this with the route for product-->
+        <li><a href="{{ url_for('products.product_test') }}?product={{ tag }}" class="nav-link px-2 link-body-emphasis">{{ tag }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="show-under-900 mobile-search">
+    {% include 'partials/search_form.html' %}
+  </div>
+</div>

@@ -1,4 +1,74 @@
-<footer>
-    <hr>
-    <p>© 2026 Choc 2026</p>
+<footer class="simple-bg-footer py-4 border-top mt-4">
+    <div class="container">
+        <div class="row align-items-center text-center text-md-start">
+
+            <!-- Left: Info links -->
+            <div class="col-12 col-md-4 mb-3 mb-md-0">
+                <ul class="nav justify-content-center justify-content-md-start">
+                    <li class="nav-item">
+                        <!--                        TODO Replace with info.delivery-->
+                        <a href="{{ url_for('login.login') }}"
+                           class="nav-link px-2 text-body-secondary">
+                            Delivery Information
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <!--                        TODO Replace with info.delivery-->
+                        <a href="{{ url_for('login.login') }}"
+                           class="nav-link px-2 text-body-secondary">
+                            Contact Us
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <!--                        TODO Replace with info.delivery-->
+                        <a href="{{ url_for('login.login') }}"
+                           class="nav-link px-2 text-body-secondary">
+                            About
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Center: Copyright -->
+            <div class="col-12 col-md-4 mb-3 mb-md-0 text-center">
+                {# TODO Replace the hardcoded Date with {{ now.year }} #}
+                <span class="text-body-secondary">
+                    © 2026 Regal Chocolate, Inc
+                </span>
+            </div>
+
+            <!-- Right: Social icons -->
+            <div class="col-12 col-md-4">
+                <ul class="nav justify-content-center justify-content-md-end list-unstyled">
+                    <li class="ms-3">
+                        <a href="https://www.instagram.com/regalchocolate.in/"
+                           aria-label="Instagram">
+                            <img src="{{ url_for('static', filename='images/instagram.svg') }}"
+                                 alt="Instagram"
+                                 width="40"
+                                 height="40">
+                        </a>
+                    </li>
+                    <li class="ms-3">
+                        <a href="https://www.facebook.com/people/Regal-Chocolate/61586712251064/"
+                           aria-label="Facebook">
+                            <img src="{{ url_for('static', filename='images/facebook.svg') }}"
+                                 alt="Facebook"
+                                 width="40"
+                                 height="40">
+                        </a>
+                    </li>
+                    <li class="ms-3">
+                        <a href="#" aria-label="Logo">
+                            <img src="{{ url_for('static', filename='images/Logo_simple.png') }}"
+                                 alt="Logo"
+                                 width="40"
+                                 height="40">
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
 </footer>

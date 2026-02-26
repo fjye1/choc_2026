@@ -1,65 +1,88 @@
-<header class="navbar-bg-header m-0 p-0">
+<header class="navbar-bg-header py-2">
   <div class="container">
-    <div class="navbar-grid">
+    <div class="row align-items-center">
 
-      <!-- MOBILE PROFILE ICON (under 900px) -->
-      <div class="left-section show-under-900">
+      <!-- LEFT: Mobile Profile (under lg) -->
+      <div class="col-4 d-lg-none">
         {% if current_user.is_authenticated %}
-        <a href="{{ url_for('profile') }}">
-          <img src="{{ current_user.email | gravatar }}"
-               alt="Profile"
-               height="30"
-               class="rounded-circle">
-        </a>
+          <a href="{{ url_for('profile.profile') }}">
+            <img src="{{ current_user.email | gravatar }}"
+                 alt="Profile"
+                 height="34"
+                 class="rounded-circle">
+          </a>
         {% else %}
-        <a href="{{ url_for('login.login') }}">
-          <img src="{{ url_for('static', filename='images/profile_guest.svg') }}"
-               alt="Guest Profile"
-               width="40"
-               height="40">
-        </a>
+          <a href="{{ url_for('login.login') }}">
+            <img src="{{ url_for('static', filename='images/profile_guest.svg') }}"
+                 alt="Guest Profile"
+                 width="34"
+                 height="34">
+          </a>
         {% endif %}
       </div>
 
-      <!-- DESKTOP NAV (over 900px) -->
-      <div class="left-section hide-under-900">
+      <!-- LEFT: Desktop Nav (lg and up) -->
+      <div class="col-lg-4 d-none d-lg-block">
         <ul class="nav mb-0">
           {% if admin %}
-          <li><a href="{{ url_for('admin') }}" class="nav-link px-2 link-secondary">Admin</a></li>
+            <li class="nav-item">
+              <a href="{{ url_for('admin.dashboard') }}"
+                 class="nav-link px-2 link-secondary">Admin</a>
+            </li>
           {% endif %}
+
           {% if not current_user.is_authenticated %}
-<!--          TODO alter this section here to render the register route. -->
-          <li><a href="{{ url_for('login.login') }}" class="nav-link px-2 link-secondary">Register</a></li>
-          <li><a href="{{ url_for('login.login') }}" class="nav-link px-2 link-body-emphasis">Login</a></li>
+            <!-- TODO remains untouched -->
+            <li class="nav-item">
+              <a href="{{ url_for('login.login') }}"
+                 class="nav-link px-2 link-secondary">Register</a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url_for('login.login') }}"
+                 class="nav-link px-2 link-body-emphasis">Login</a>
+            </li>
           {% endif %}
-          <li><a href="{{ url_for('home.index') }}" class="nav-link px-2 link-body-emphasis">Home</a></li>
-          <li><a href="{{ url_for('products.product_test') }}" class="nav-link px-2 link-body-emphasis">Products</a></li>
+
+          <li class="nav-item">
+            <a href="{{ url_for('home.index') }}"
+               class="nav-link px-2 link-body-emphasis">Home</a>
+          </li>
+
+          <li class="nav-item">
+            <a href="{{ url_for('products.product_test') }}"
+               class="nav-link px-2 link-body-emphasis">Products</a>
+          </li>
         </ul>
       </div>
 
       <!-- CENTER LOGO -->
-      <div class="center-logo">
+      <div class="col-4 col-lg-4 text-center">
         <a href="{{ url_for('home.index') }}">
           <picture>
-            <source media="(max-width: 900px)"
+            <source media="(max-width: 991px)"
                     srcset="{{ url_for('static', filename='images/mobile_logo_small.png') }}">
             <img src="{{ url_for('static', filename='images/Logo_small.png') }}"
                  alt="Site Logo"
                  loading="lazy"
-                 class="lazy-swap product-img">
+                 class="img-fluid"
+                 style="max-height: 80px;">
           </picture>
         </a>
       </div>
 
-      <!-- RIGHT SECTION (Search + Profile + Cart) -->
-      <div class="right-section">
-        <div class="hide-under-900 d-flex align-items-center gap-3">
+      <!-- RIGHT SECTION -->
+      <div class="col-4 col-lg-4 text-end">
+
+        <!-- Desktop Search + Dropdown -->
+        <div class="d-none d-lg-inline-flex align-items-center gap-3">
           {% include 'partials/search_form.html' %}
           {% include 'partials/user_dropdown.html' %}
         </div>
 
         {% include 'partials/cart_icon.html' %}
+
       </div>
+
     </div>
   </div>
 </header>

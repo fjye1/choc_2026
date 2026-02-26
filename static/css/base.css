@@ -1,0 +1,46 @@
+@font-face {
+  font-family: "Amsterdam One";
+  src: url("/static/fonts/AmsterdamThreeSlant-axaym.ttf") format("truetype");
+}
+
+body {
+  overflow-x: hidden;
+  background-color: #f3eff9;
+}
+
+h2 {
+  margin: 20px 0;
+  padding: 10px;
+}
+
+.navbar-bg-header {
+  background-color: #afc08f;
+}
+
+.categories-bg-header {
+  background-color: #fce7a3;
+}
+
+.simple-bg-footer {
+  background-color: #fce7a3;
+}
+
+:root {
+  --brand-primary: #afc08f;
+  --brand-secondary: #fce7a3;
+  --brand-bg: #f3eff9;
+}
+
+body {
+  overflow-x: hidden;
+  background-color: var(--brand-bg);
+}
+
+.navbar-bg-header {
+  background-color: var(--brand-primary);
+}
+
+.categories-bg-header,
+.simple-bg-footer {
+  background-color: var(--brand-secondary);
+}

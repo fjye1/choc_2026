@@ -1,8 +1,105 @@
 {% extends 'base/base.html' %}
+{% from "partials/_product_card.html" import product_card %}
 
-{% block title %}Home - Choc 2026{% endblock %}
+{% block title %}Home - Chocolate Shop{% endblock %}
 
 {% block content %}
-<h2>Home Page</h2>
-<p>Welcome to the Choc 2026 homepage!</p>
+
+<!-- Hero Image -->
+<img src="{{ url_for('static', filename='images/central_hero_small.png') }}"
+     alt="Hero image"
+     class="hero-full"
+     loading="lazy">
+
+<h1 class="text-center my-4" style="font-family: 'Amsterdam One', cursive;">Welcome</h1>
+
+{% if current_user.admin %}
+<div class="text-center mb-3">
+    <a href="{{ url_for('create_shipment') }}" class="btn btn-primary me-2">+ Create New Shipment</a>
+    <a href="{{ url_for('create_product') }}" class="btn btn-primary">+ Create New Product</a>
+</div>
+{% endif %}
+
+<!-- Best Sellers -->
+<h2 class="text-center my-4">Best Sellers</h2>
+<div class="container-fluid">
+    <div class="row g-0 align-items-center justify-content-center">
+
+        <!-- Left image -->
+        <div class="col-12 col-md-4 d-none d-xxl-block">
+            <img src="{{ url_for('static', filename='images/hero_1_small.png') }}"
+                 alt="photo"
+                 class="img-fluid full-bleed-left lazy-swap"
+                 loading="lazy">
+        </div>
+
+        <!-- Product cards -->
+        <div class="col-12 col-lg-8 px-3 py-4">
+
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+<!--                TODO replace dummy_products with sorted_products-->
+                {% for product in dummy_products[:6] if product.is_active %}
+                {{ product_card(product, user_alerts, current_user) }}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+<hr>
+
+<!-- Customer Reviews -->
+<section class="reviews my-5">
+    <h2 class="text-center mb-4">What Our Customers Say</h2>
+    <div class="container">
+        <div class="row g-4">
+            {% for comment in comments %}
+            <div class="col-md-4">
+                <blockquote class="blockquote p-4 bg-light rounded shadow-sm position-relative">
+                    <span class="quote-mark">“</span>
+                    <p class="mb-0">{{ comment.comment }}</p>
+
+                    <div class="rating mt-2 mb-1">
+                        {% for i in range(1, 6) %}
+                        {% if i <= comment.rating %}⭐{% else %}☆{% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <footer class="blockquote-footer mt-2">
+                        {{ comment.user.name.split(' ')[0] }} —
+                        <cite title="Product">{{ comment.product.name }}</cite>
+                    </footer>
+                </blockquote>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<hr>
+
+<!-- Recommended Products -->
+<h2 class="text-center my-4">We Think You Will Love</h2>
+<div class="container-fluid">
+    <div class="row g-0 align-items-center justify-content-center">
+
+        <!-- Left image -->
+        <div class="col-12 col-md-4 d-none d-xxl-block">
+            <img src="{{ url_for('static', filename='images/hero_2_small.png') }}"
+                 alt="photo"
+                 class="img-fluid full-bleed-left lazy-swap"
+                 loading="lazy">
+        </div>
+
+        <!-- Product cards -->
+        <div class="col-12 col-lg-8 px-3 py-4">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+                {% for product in products if product.is_active and loop.index <= 6 %}
+                {{ product_card(product, user_alerts, current_user) }}
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+<hr>
+
 {% endblock %}

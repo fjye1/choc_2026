@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 from flask import g
 from flask_login import current_user
-
+from .context_injectors import inject_globals, inject_dummy_products
 
 
 db = SQLAlchemy()
@@ -28,14 +28,10 @@ def create_app():
     app.register_blueprint(admin_bp)
     app.register_blueprint(login_bp)
 
-    @app.context_processor
-    def inject_globals():
-        return {
-            "current_user": getattr(g, "current_user", None),  # or current_user if Flask-Login installed
-            "cart_items": [],
-            "admin": False,
-            "left_tags": ["Chocolate", "Caramel", "Wafer", ],
-            "right_tags": ["KitKat", "Mars", "Twix"],
-        }
+
+    app.context_processor(inject_globals)
+    app.context_processor(inject_dummy_products)
+
 
     return app
+

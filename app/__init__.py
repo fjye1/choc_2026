@@ -34,8 +34,8 @@ def create_app():
             "current_user": getattr(g, "current_user", None),  # or current_user if Flask-Login installed
             "cart_items": [],
             "admin": False,
-            "left_tags": ["Chocolate", "Caramel", "Wafer", "Bounty", "Snickers", "Tunnock's"],
-            "right_tags": ["KitKat", "Mars", "Twix", "Galaxy", "Cadbury", "Lindt"],
+            "left_tags": ["Chocolate", "Caramel", "Wafer", ],
+            "right_tags": ["KitKat", "Mars", "Twix"],
         }
 
     return app

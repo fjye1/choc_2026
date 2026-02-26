@@ -1,46 +1,44 @@
+/* ------------------ Fonts ------------------ */
 @font-face {
   font-family: "Amsterdam One";
   src: url("/static/fonts/AmsterdamThreeSlant-axaym.ttf") format("truetype");
 }
 
+/* ------------------ Colors ------------------ */
+:root {
+  --brand-primary: #afc08f;    /* header green */
+  --brand-secondary: #fce7a3;  /* categories & footer yellow */
+  --brand-bg: #f3eff9;         /* page background */
+}
+
+/* ------------------ Global Styles ------------------ */
 body {
   overflow-x: hidden;
-  background-color: #f3eff9;
+  background-color: var(--brand-bg);
+  font-family: "Amsterdam One", sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 h2 {
   margin: 20px 0;
-  padding: 10px;
+  padding: 10px 0;
 }
 
-.navbar-bg-header {
-  background-color: #afc08f;
-}
-
-.categories-bg-header {
-  background-color: #fce7a3;
-}
-
-.simple-bg-footer {
-  background-color: #fce7a3;
-}
-
-:root {
-  --brand-primary: #afc08f;
-  --brand-secondary: #fce7a3;
-  --brand-bg: #f3eff9;
-}
-
-body {
-  overflow-x: hidden;
-  background-color: var(--brand-bg);
-}
-
+/* ------------------ Header ------------------ */
 .navbar-bg-header {
   background-color: var(--brand-primary);
+  padding: 0.5rem 0;
 }
 
+/* ------------------ Categories & Footer ------------------ */
 .categories-bg-header,
 .simple-bg-footer {
   background-color: var(--brand-secondary);
+}
+
+/* ------------------ Utility ------------------ */
+img {
+  max-width: 100%;
+  height: auto;
 }

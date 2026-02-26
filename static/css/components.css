@@ -1,6 +1,7 @@
+/* ------------------ Products ------------------ */
 .product-name {
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 2; /* limit to 2 lines */
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -11,8 +12,90 @@
   object-fit: cover;
 }
 
+/* ------------------ Comments ------------------ */
 .sleek-comments {
   background: #f8f9fa;
   border-radius: 8px;
   padding: 1rem;
+}
+
+/* ------------------ Categories Bar ------------------ */
+.categories-bg-header {
+  background-color: #fce7a3; /* brand yellow */
+  padding: 0.25rem 0; /* vertical spacing */
+}
+
+.categories-bg-header .nav {
+  margin-bottom: 0; /* remove default Bootstrap margin */
+}
+
+.categories-bg-header .nav-link {
+  padding: 0 0.75rem;
+  font-size: 0.9rem;
+  color: #000; /* black text for contrast */
+}
+
+.categories-bg-header .nav-link:hover {
+  color: #495057; /* subtle hover effect */
+  text-decoration: underline;
+}
+
+/* ------------------ Mobile Search in Categories Bar ------------------ */
+.categories-bg-header .d-lg-none form {
+  margin: 0;
+}
+
+.categories-bg-header .d-lg-none input[type="search"] {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid #ced4da;
+}
+
+/* ------------------ Header Top Bar ------------------ */
+.navbar-bg-header {
+  background-color: #afc08f; /* brand green */
+  padding: 0.5rem 0;
+}
+
+.navbar-bg-header .nav-link {
+  color: #000;
+}
+
+.navbar-bg-header .nav-link:hover {
+  color: #495057;
+}
+
+/* ------------------ Center Logo ------------------ */
+.center-logo img {
+  max-height: 60px;
+  height: auto;
+}
+
+/* ------------------ Profile & Cart ------------------ */
+.right-section img,
+.left-section img {
+  max-height: 40px;
+  height: auto;
+}
+
+/* ------------------ Utility ------------------ */
+.hide-under-900 {
+  display: none !important;
+}
+
+@media (min-width: 992px) {
+  .hide-under-900 {
+    display: block !important;
+  }
+}
+
+.d-lg-none {
+  display: block !important;
+}
+
+@media (min-width: 992px) {
+  .d-lg-none {
+    display: none !important;
+  }
 }

@@ -1,0 +1,43 @@
+{% extends 'base/base.html' %}
+
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/search.css') }}">
+{% endblock %}
+
+{% block content %}
+<h2>Search results for "{{ query }}"</h2>
+
+{% if results %}
+<ul class="list-group search-results">
+    {% for product in results %}
+    <li class="list-group-item search-result-item">
+        <img src="/{{ product.image }}"
+             alt="Product Image"
+             class="search-product-image">
+
+        <a href="{{ url_for('product.product_detail', product_id=product.id) }}"
+           class="search-product-link">
+            {{ product.name }}
+        </a>
+
+        {% set box = product.lowest_price_box() %}
+        <span class="search-product-price">
+            ₹{{ "%.2f"|format(box.price_inr_unit) }}
+        </span>
+
+        <p class="search-product-description">
+            {{ product.description[:100] }}
+            {% if product.description|length > 100 %}...{% endif %}
+        </p>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No results found.</p>
+{% endif %}
+
+<a href="{{ url_for('home.index') }}">Back to home</a>
+{% endblock %}
+
+

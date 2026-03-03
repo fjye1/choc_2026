@@ -1,12 +1,7 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-
-from flask import g
-from flask_login import current_user
+from .extensions import db
 from .context_injectors import inject_globals, inject_dummy_products
 
-
-db = SQLAlchemy()
 
 def create_app():
     app = Flask(
@@ -19,12 +14,13 @@ def create_app():
     db.init_app(app)
 
     from app.routes.home import home_bp
-    from app.routes.products import products_bp
+    from app.routes.products import product_bp
     from app.routes.admin import admin_bp
     from app.routes.login import login_bp
 
+
     app.register_blueprint(home_bp)
-    app.register_blueprint(products_bp)
+    app.register_blueprint(product_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(login_bp)
 

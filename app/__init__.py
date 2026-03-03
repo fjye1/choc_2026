@@ -1,5 +1,5 @@
 from flask import Flask
-from .extensions import db
+from .extensions import db, login_manager
 from .context_injectors import inject_globals, inject_dummy_products
 
 
@@ -12,6 +12,10 @@ def create_app():
     app.config.from_object("config.Config")
 
     db.init_app(app)
+    login_manager.init_app(app)  # <-- here
+
+    login_manager.login_view = "login.login"  # redirect if not logged in
+    login_manager.login_message_category = "info"
 
     from app.routes.home import home_bp
     from app.routes.products import product_bp

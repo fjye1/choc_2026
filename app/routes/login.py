@@ -29,6 +29,13 @@
 # app/routes/login.py
 from flask import Blueprint, render_template
 
+from app.extensions import login_manager
+from app.models import User
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 login_bp = Blueprint('login', __name__)
 
 @login_bp.route('/login')

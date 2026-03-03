@@ -1,0 +1,6 @@
+<h3 class="mt-4">Related Products</h3>
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for p in similar_products %}
+        {{ product_card(p, user_alerts, current_user) }}
+    {% endfor %}
+</div>

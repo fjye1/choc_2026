@@ -16,7 +16,7 @@
              alt="Product Image"
              class="search-product-image">
 
-        <a href="{{ url_for('product.product_detail', product_id=product.id) }}"
+        <a href="{{ url_for('product.product_view', slug=product.slug) }}"
            class="search-product-link">
             {{ product.name }}
         </a>

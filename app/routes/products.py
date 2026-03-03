@@ -1,5 +1,20 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from app.models import Product
+from flask_login import current_user, AnonymousUserMixin
+from datetime import date, timedelta
+from sqlalchemy import literal
+
+# Models
+from app.models import Product, Box, Shipment, Comment, PriceAlert, OrderItem, Orders
+
+# Services / Utils
+from app.services.product_service import ProductService
+from app.utils.functions import precompute_products
+
+# Forms
+from app.forms import CommentForm, AddToCartForm
+
+# Extensions
+from app.extensions import db, safe_commit
 
 product_bp = Blueprint("product", __name__, url_prefix="/products")
 
@@ -25,3 +40,92 @@ def search():
         query=query,
         results=results
     )
+
+@product_bp.route("/product/<slug>", methods=["GET", "POST"])
+def product_view(slug):
+    product = ProductService.get_product_by_slug(slug)
+    product_id = product.id
+
+    # Similar products using embedding
+    results = (
+        db.session.query(Product)
+        .filter(Product.is_active)
+        .order_by(Product.embedding.cosine_distance(literal(product.embedding)))
+        .limit(4)
+        .all()
+    )
+    similar_products = precompute_products(results[1:4])
+
+    # Comment form
+    comment_form = CommentForm()
+
+    # Boxes that have arrived and are in stock
+    boxes = Box.query.join(Box.shipment)\
+        .filter(Box.product_id == product.id, Shipment.has_arrived, Box.quantity > 0)\
+        .order_by(Box.price_inr_unit.desc())\
+        .all()
+
+    # Group by price
+    price_groups = {}
+    for box in boxes:
+        if box.price_inr_unit not in price_groups:
+            price_groups[box.price_inr_unit] = {
+                'quantity': 0,
+                'expiry': box.expiration_date,
+                'box': box,
+                'shipment': box.shipment
+            }
+        price_groups[box.price_inr_unit]['quantity'] += box.quantity
+
+    next_box = min(boxes, key=lambda b: b.price_inr_unit, default=None)
+
+    add_to_cart_form = AddToCartForm(
+        product_id=product.id,
+        box_id=next_box.id if next_box else None,
+        shipment_id=next_box.shipment_id if next_box else None
+    )
+
+    # User-specific logic
+    if isinstance(current_user, AnonymousUserMixin):
+        user_alert = None
+        can_comment = False
+    else:
+        user_alert = PriceAlert.query.filter_by(user_id=current_user.id, product_id=product.id).first()
+        has_purchased = db.session.query(OrderItem).join(Orders)\
+            .filter(Orders.user_id == current_user.id, OrderItem.product_id == product_id).first() is not None
+        already_commented = Comment.query.filter_by(user_id=current_user.id, product_id=product_id).first() is not None
+        can_comment = has_purchased and not already_commented
+
+    if comment_form.validate_on_submit() and can_comment:
+        new_comment = Comment(
+            user_id=current_user.id,
+            product_id=product_id,
+            comment=comment_form.comment_text.data,
+            rating=comment_form.rating.data
+        )
+        db.session.add(new_comment)
+        safe_commit()
+        return redirect(url_for('product.product_view', slug=product.slug))
+
+    # Recent sales for charts
+    start_date = date.today() - timedelta(days=28)
+    recent_sales = [s for box in product.boxes for s in box.sales_history if s.date >= start_date]
+    recent_sales.sort(key=lambda s: s.date)
+
+    dates = [s.date.strftime('%Y-%m-%d') for s in recent_sales]
+    prices = [s.sold_price for s in recent_sales]
+    sales = [s.sold_quantity for s in recent_sales]
+
+    return render_template("product/product_view.html",
+                           product=product,
+                           form=comment_form,
+                           add_to_cart_form=add_to_cart_form,
+                           can_comment=can_comment,
+                           dates=dates,
+                           prices=prices,
+                           sales=sales,
+                           user_alert=user_alert,
+                           similar_products=similar_products,
+                           price_groups=price_groups,
+                           next_box=next_box
+                           )

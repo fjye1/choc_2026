@@ -1,5 +1,3 @@
-from flask import Blueprint, render_template
-
 from flask import Blueprint, render_template, session, flash
 from flask_login import current_user
 from sqlalchemy import func

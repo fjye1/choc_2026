@@ -11,3 +11,16 @@ def precompute_products(products):
         product._lowest_box = min(arrived_boxes, key=lambda b: b.price_inr_unit) if arrived_boxes else None
 
     return products
+
+def build_price_groups(boxes):
+    groups = {}
+    for box in boxes:
+        if box.price_inr_unit not in groups:
+            groups[box.price_inr_unit] = {
+                "quantity": 0,
+                "expiry": box.expiration_date,
+                "box": box,
+                "shipment": box.shipment
+            }
+        groups[box.price_inr_unit]["quantity"] += box.quantity
+    return groups

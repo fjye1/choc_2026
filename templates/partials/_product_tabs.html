@@ -1,19 +1,38 @@
 <div class="row mt-4">
+
+    <!-- LEFT COLUMN: Tabs -->
     <div class="col-md-6">
         <ul class="nav nav-tabs" id="productInfoTabs" role="tablist">
             <li class="nav-item">
-                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#ingredients">Ingredients</button>
+                <button class="nav-link active"
+                        data-bs-toggle="tab"
+                        data-bs-target="#ingredients">
+                    Ingredients
+                </button>
             </li>
             <li class="nav-item">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#allergens">Allergens</button>
+                <button class="nav-link"
+                        data-bs-toggle="tab"
+                        data-bs-target="#allergens">
+                    Allergens
+                </button>
             </li>
             <li class="nav-item">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#nutrition">Nutrition</button>
+                <button class="nav-link"
+                        data-bs-toggle="tab"
+                        data-bs-target="#nutrition">
+                    Nutrition
+                </button>
             </li>
         </ul>
+
         <div class="tab-content card card-body mt-2">
-            <div class="tab-pane fade show active" id="ingredients">{{ product.ingredients or "N/A" }}</div>
-            <div class="tab-pane fade" id="allergens">{{ product.allergens or "N/A" }}</div>
+            <div class="tab-pane fade show active" id="ingredients">
+                {{ product.ingredients or "N/A" }}
+            </div>
+            <div class="tab-pane fade" id="allergens">
+                {{ product.allergens or "N/A" }}
+            </div>
             <div class="tab-pane fade" id="nutrition">
                 <ul>
                     <li>Energy: {{ product.energy_kj or 0 }} kJ / {{ product.energy_kcal or 0 }} kcal</li>
@@ -28,4 +47,13 @@
             </div>
         </div>
     </div>
+
+    <!-- RIGHT COLUMN: Price Chart -->
+    <div class="col-md-6">
+        <div class="card card-body h-100">
+            <h5>Price Trend</h5>
+            <canvas id="priceChart" height="200"></canvas>
+        </div>
+    </div>
+
 </div>

@@ -1,19 +1,63 @@
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/comment.css') }}">
+{% endblock %}
 {% if can_comment %}
+<p><strong>You can only submit one comment.</strong></p>
 <form method="POST" class="mt-4">
     {{ form.hidden_tag() }}
+
     <label for="rating">Rating:</label>
-    <input type="range" id="rating" name="rating" min="1" max="5" value="3" oninput="updateStars(this.value)">
-    <div id="stars">⭐⭐⭐☆☆</div>
+    <input type="range"
+           id="rating"
+           name="rating"
+           min="1"
+           max="5"
+           value="3"
+           oninput="updateStars(this.value)">
+
+    <div id="stars" class="star-display">⭐⭐⭐☆☆</div>
+
+    {{ form.comment_text.label }}
     {{ form.comment_text(class="form-control") }}
-    <button type="submit" class="btn btn-primary mt-2">Submit</button>
+
+    <button type="submit" class="btn btn-primary mt-2">
+        Submit
+    </button>
 </form>
 {% endif %}
 
-<div class="mt-4">
+<!-- Sleek Comments Section -->
+<div class="sleek-comments mt-4">
+    <div class="comments-header">
+        Customer Reviews
+        <span class="comment-count">
+            {{ product.comments|length }}
+        </span>
+    </div>
+
     {% for comment in product.comments %}
-        <div class="comment">
-            <strong>{{ comment.user.name }}</strong> ⭐{{ comment.rating }}
-            <p>{{ comment.comment|safe }}</p>
+    <div class="comment-item">
+        <img src="{{ comment.user.email | gravatar }}"
+             class="comment-avatar"
+             />
+
+        <div class="comment-text">
+            {{ comment.comment | safe }}
         </div>
+
+        <div class="comment-name">
+            {% set parts = comment.user.name.split(' ') %}
+            {{ parts[0] }}
+            {% if parts|length > 1 %}
+            {{ parts[1][0] }}.
+            {% endif %}
+        </div>
+
+        <div class="comment-rating">
+            {% for i in range(1,6) %}
+            {% if i <= comment.rating %}⭐{% else %}☆{% endif %}
+            {% endfor %}
+        </div>
+    </div>
     {% endfor %}
 </div>

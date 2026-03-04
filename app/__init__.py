@@ -1,7 +1,7 @@
 from flask import Flask
 from .extensions import db, login_manager
 from .context_injectors import inject_globals, inject_dummy_products
-
+from app.utils.gravatar import gravatar_url
 
 def create_app():
     app = Flask(
@@ -13,6 +13,7 @@ def create_app():
 
     db.init_app(app)
     login_manager.init_app(app)  # <-- here
+    app.jinja_env.filters['gravatar'] = gravatar_url
 
     login_manager.login_view = "login.login"  # redirect if not logged in
     login_manager.login_message_category = "info"

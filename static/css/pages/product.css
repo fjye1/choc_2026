@@ -1,0 +1,21 @@
+.product-img img {
+    max-width: 100%;
+    border-radius: 8px;
+}
+
+.card.shadow-sm {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+#stars {
+    font-size: 1.2rem;
+    color: #f5c518; /* gold stars */
+}
+
+.qty-btn img {
+    cursor: pointer;
+}
+
+.table th {
+    width: 150px;
+}

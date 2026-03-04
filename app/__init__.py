@@ -1,6 +1,6 @@
 from flask import Flask
 from .extensions import db, login_manager
-from .context_injectors import inject_globals, inject_dummy_products
+from .context_injectors import inject_globals, inject_dummy_products, inject_top_tags
 from app.utils.gravatar import gravatar_url
 
 def create_app():
@@ -32,6 +32,7 @@ def create_app():
 
     app.context_processor(inject_globals)
     app.context_processor(inject_dummy_products)
+    app.context_processor(inject_top_tags)
 
 
     return app

@@ -52,7 +52,7 @@ def register():
     form = RegisterForm()
 
     if form.validate_on_submit():
-        # 1️⃣ Check if email exists
+        # 1️ Check if email exists
         existing_user = db.session.execute(
             db.select(User).where(User.email == form.email.data)
         ).scalar()
@@ -60,14 +60,14 @@ def register():
             flash("You've already signed up with that email, log in instead!", "info")
             return redirect(url_for('auth.login'))  # use blueprint prefix
 
-        # 2️⃣ Hash password
+        # 2️ Hash password
         hashed_password = generate_password_hash(
             form.password.data,
             method='pbkdf2:sha256',
             salt_length=8
         )
 
-        # 3️⃣ Create new user
+        # 3️ Create new user
         new_user = User(
             email=form.email.data,
             name=form.name.data,
@@ -76,10 +76,10 @@ def register():
         db.session.add(new_user)
         safe_commit()
 
-        # 4️⃣ Log the user in
+        # 4️ Log the user in
         login_user(new_user)
 
-        # 5️⃣ Merge guest basket into DB cart
+        # 5️ Merge guest basket into DB cart
         basket = session.get('basket', [])
         if basket:
             cart = get_user_cart_cached(new_user.id)
@@ -105,8 +105,13 @@ def register():
             safe_commit()
             session.pop('basket', None)
 
-        # 6️⃣ Redirect to home page
+        # 6️ Redirect to home page
         return redirect(url_for("home.index"))
 
-    # 7️⃣ Render the template
+    else:
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(error, 'danger')
+
+    # 7 Render the template
     return render_template("auth/register.html", form=form)

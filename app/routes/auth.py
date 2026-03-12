@@ -28,12 +28,12 @@
 
 # app/routes/auth.py
 from flask import Blueprint, render_template, flash, redirect, url_for, session
-from flask_login import login_user
+from flask_login import login_user, current_user
 from app.extensions import login_manager, db, safe_commit
 from app.models import User, Cart,CartItem
 from app.forms import RegisterForm, LoginForm
-from werkzeug.security import generate_password_hash
-from app.utils.cart import get_user_cart_cached
+from werkzeug.security import generate_password_hash, check_password_hash
+from app.utils.cart import get_user_cart_cached, merge_session_basket_to_cart
 from datetime import datetime, timezone
 # User loader
 @login_manager.user_loader
@@ -43,9 +43,30 @@ def load_user(user_id):
 # Blueprint
 auth_bp = Blueprint('auth', __name__, template_folder='templates/auth')
 
-@auth_bp.route('/login')
+@auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template("auth/login.html")
+    form = LoginForm()
+
+    if form.validate_on_submit():
+        # 1️ Look up user by email
+        user = User.query.filter_by(email=form.email.data).first()
+
+        # 2️ Check password
+        if not user or not check_password_hash(user.password, form.password.data):
+            flash("Invalid email or password", "danger")
+            return redirect(url_for('auth.login'))
+
+        # 3️ Log the user in
+        login_user(user)
+
+        # 4️ Merge guest basket into DB cart
+        merge_session_basket_to_cart(current_user)
+
+        # 5️ Redirect to home page
+        return redirect(url_for('home.index'))
+
+    # 6️ Render login template with form
+    return render_template("auth/login.html", form=form)
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
@@ -80,30 +101,7 @@ def register():
         login_user(new_user)
 
         # 5️ Merge guest basket into DB cart
-        basket = session.get('basket', [])
-        if basket:
-            cart = get_user_cart_cached(new_user.id)
-            if not cart:
-                cart = Cart(user_id=new_user.id, created_at=datetime.now(timezone.utc))
-                db.session.add(cart)
-                safe_commit()
-
-            for b in basket:
-                existing_item = CartItem.query.filter_by(
-                    cart_id=cart.id,
-                    product_id=b['product_id']
-                ).first()
-                if existing_item:
-                    existing_item.quantity += b['quantity']
-                else:
-                    new_item = CartItem(
-                        cart_id=cart.id,
-                        product_id=b['product_id'],
-                        quantity=b['quantity']
-                    )
-                    db.session.add(new_item)
-            safe_commit()
-            session.pop('basket', None)
+        merge_session_basket_to_cart(current_user)
 
         # 6️ Redirect to home page
         return redirect(url_for("home.index"))

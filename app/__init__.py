@@ -30,7 +30,7 @@ def create_app():
     app.register_blueprint(auth_bp)
 
 
-    app.context_processor(inject_globals)
+
     app.context_processor(inject_dummy_products)
     app.context_processor(inject_top_tags)
 

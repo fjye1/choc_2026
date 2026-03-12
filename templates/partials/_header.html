@@ -9,7 +9,7 @@
                         <img src="{{ current_user.email | gravatar }}" alt="Profile" height="34" class="rounded-circle">
                     </a>
                 {% else %}
-                    <a href="{{ url_for('login.login') }}">
+                    <a href="{{ url_for('auth.login') }}">
                         <img src="{{ url_for('static', filename='images/profile_guest.svg') }}" alt="Guest" width="34">
                     </a>
                 {% endif %}
@@ -25,8 +25,8 @@
                     {% endif %}
                     {% if not current_user.is_authenticated %}
 <!--                    TODO change this for register-->
-                        <li class="nav-item"><a href="{{ url_for('login.login') }}" class="nav-link px-2 link-secondary">Register</a></li>
-                        <li class="nav-item"><a href="{{ url_for('login.login') }}" class="nav-link px-2 link-body-emphasis">Login</a></li>
+                        <li class="nav-item"><a href="{{ url_for('auth.register') }}" class="nav-link px-2 link-secondary">Register</a></li>
+                        <li class="nav-item"><a href="{{ url_for('auth.login') }}" class="nav-link px-2 link-body-emphasis">Login</a></li>
                     {% endif %}
                     <li class="nav-item"><a href="{{ url_for('home.index') }}" class="nav-link px-2 link-body-emphasis">Home</a></li>
                     <li class="nav-item"><a href="{{ url_for('home.catalog') }}" class="nav-link px-2 link-body-emphasis">Products</a></li>
@@ -82,7 +82,7 @@
         <!-- Mobile search (replaces categories nav) -->
         <div class="d-lg-none py-2">
 <!--            TODO replace this with the URL for Search-->
-            <form role="search" action="{{ url_for('login.login') }}" method="GET">
+            <form role="search" action="{{ url_for('auth.login') }}" method="GET">
                 <input type="search" name="q" class="form-control" placeholder="Search products..." aria-label="Search">
             </form>
         </div>

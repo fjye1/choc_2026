@@ -7,52 +7,52 @@
 {% if alerts %}
 <table class="table table-bordered table-hover mt-3 align-middle">
     <thead>
-        <tr>
-            <th></th>
-            <th>Product</th>
-            <th>Target Price</th>
-            <th>Expires</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
+    <tr>
+        <th></th>
+        <th>Product</th>
+        <th>Target Price</th>
+        <th>Expires</th>
+        <th>Status</th>
+        <th>Actions</th>
+    </tr>
     </thead>
     <tbody>
-        {% for alert in alerts %}
-        <tr>
-            <!-- Product Image -->
-            <td>
-                <img src="{{ url_for('static', filename=alert.product.image) }}"
-                     alt="Product Image"
-                     height="70">
-            </td>
+    {% for alert in alerts %}
+    <tr>
+        <!-- Product Image -->
+        <td>
+            <img src="{{ url_for('static', filename=alert.product.image) }}"
+                 alt="Product Image"
+                 height="70">
+        </td>
 
-            <!-- Product Info -->
-            <td>{{ alert.product.name }}</td>
-            <td>£{{ "%.2f"|format(alert.target_price) }}</td>
+        <!-- Product Info -->
+        <td>{{ alert.product.name }}</td>
+        <td>£{{ "%.2f"|format(alert.target_price) }}</td>
 
-            <!-- Expiry -->
-            <td>{{ alert.expires_at.strftime("%Y-%m-%d") if alert.expires_at else "N/A" }}</td>
+        <!-- Expiry -->
+        <td>{{ alert.expires_at.strftime("%Y-%m-%d") if alert.expires_at else "N/A" }}</td>
 
-            <!-- Status -->
-            <td>
-                {% if alert.notified %}
-                    ✅ Notified
-                {% else %}
-                    ⏳ Waiting
-                {% endif %}
-            </td>
+        <!-- Status -->
+        <td>
+            {% if alert.notified %}
+            ✅ Notified
+            {% else %}
+            ⏳ Waiting
+            {% endif %}
+        </td>
 
-            <!-- Actions -->
-            <td>
-                <form action="{{ url_for('profile.delete_alert', alert_id=alert.id) }}"
-                      method="post"
-                      style="display:inline;">
-                    {{ csrf_token() }}
-                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
+        <!-- Actions -->
+        <td>
+            <!--                TODO replace this with a ('profile.delete_alert', alert_id=alert.id)-->
+            <form action="{{ url_for('product.delete_alert', alert_id=alert.id) }}" method="post"
+                  style="display:inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
     </tbody>
 </table>
 {% else %}

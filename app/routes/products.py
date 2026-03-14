@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, abort
 from flask_login import current_user, AnonymousUserMixin, login_required
 from datetime import date, timedelta, timezone, datetime
 from sqlalchemy import literal
@@ -192,3 +192,16 @@ def set_price_alert():
 
     # ✅ Redirect to slug-based URL
     return redirect(url_for('product.product_view', slug=product.slug))
+
+@product_bp.route('/delete-alert/<int:alert_id>', methods=['POST'])
+@login_required
+def delete_alert(alert_id):
+    alert = PriceAlert.query.get_or_404(alert_id)
+
+    if alert.user_id != current_user.id:
+        abort(403)
+
+    db.session.delete(alert)
+    safe_commit()
+    flash("Price alert deleted.", "success")
+    return redirect(url_for('profile.profile_price_alerts'))

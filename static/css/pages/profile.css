@@ -1,0 +1,11 @@
+.add-address-form {
+    max-height: 0;              /* collapsed by default */
+    overflow: hidden;           /* hide content when collapsed */
+    margin-bottom: 0;
+    transition: max-height 1.5s ease;
+}
+
+.add-address-form.visible {
+    max-height: 1000px;         /* large enough to fit content */
+    margin-bottom: 2rem;
+}

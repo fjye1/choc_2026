@@ -1,4 +1,5 @@
 {% extends 'base/base.html' %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/profile.css') }}">{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
@@ -9,9 +10,9 @@
             <div class="list-group">
 <!--                TODO update these routes for the pages when the are finished-->
                 <a href="{{ url_for('profile.profile') }}" class="list-group-item list-group-item-action">Profile</a>
-                <a href="{{ url_for('profile.profile') }}" class="list-group-item list-group-item-action">Orders</a>
-                <a href="{{ url_for('profile.profile') }}" class="list-group-item list-group-item-action">Price alerts</a>
-                <a href="{{ url_for('profile.profile') }}" class="list-group-item list-group-item-action">Addresses</a>
+                <a href="{{ url_for('profile.profile_orders') }}" class="list-group-item list-group-item-action">Orders</a>
+                <a href="{{ url_for('profile.profile_price_alerts') }}" class="list-group-item list-group-item-action">Price alerts</a>
+                <a href="{{ url_for('profile.profile_addresses') }}" class="list-group-item list-group-item-action">Addresses</a>
 <!--                TODO build an AUTH log out route-->
                 <a href="{{ url_for('auth.logout') }}" class="list-group-item list-group-item-action">Logout</a>
             </div>
@@ -24,7 +25,9 @@
 
     </div>
 </div>
+<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
 {% endblock %}
+
 
 <!--<a href="{{ url_for('profile.profile') }}" class="list-group-item list-group-item-action">Profile</a>-->
 <!--<a href="{{ url_for('profile.profile_orders') }}" class="list-group-item list-group-item-action">Orders</a>-->

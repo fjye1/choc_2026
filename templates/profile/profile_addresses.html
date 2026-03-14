@@ -1,0 +1,43 @@
+{% extends "profile/profile_base.html" %}
+{% block title %}Your Addresses{% endblock %}
+{% block profile_block %}
+
+<h2>Your Addresses</h2>
+
+
+<!-- Add New Address Button -->
+<div class="text-center mt-4">
+    <button id="toggleAddAddress" class="btn btn-secondary">
+        + Add New Address
+    </button>
+</div>
+<!-- Add Address Form Partial -->
+{% include 'partials/_add_address_form.html' %}
+
+<!-- Existing Addresses -->
+<div class="row mt-3">
+    {% for address in addresses %}
+    <div class="col-md-4">
+        <div class="card mb-3 {% if address.current_address %}border-success{% endif %}">
+            <div class="card-body">
+                <h5 class="card-title">{{ address.city }}</h5>
+                <p>{{ address.street }}<br>{{ address.postcode }}</p>
+
+                {% if not address.current_address %}
+                <form method="POST" action="{{ url_for('profile.set_current_address', address_id=address.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-outline-primary btn-sm">Make Default</button>
+                </form>
+                {% endif %}
+
+                <form method="POST" action="{{ url_for('profile.delete_address', address_id=address.id) }}" class="mt-2">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

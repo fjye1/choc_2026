@@ -10,9 +10,9 @@
     </a>
     <ul class="dropdown-menu dropdown-menu-end text-small">
         <li><a class="dropdown-item" href="{{ url_for('profile.profile') }}">Profile</a></li>
-        <!--                        TODO update the routes for profile_orders and profile_price_alert-->
-        <li><a class="dropdown-item" href="{{ url_for('profile.profile') }}">Orders</a></li>
-        <li><a class="dropdown-item" href="{{ url_for('profile.profile') }}">Price
+        <!--                        TODO update the routes for profile_price_alert-->
+        <li><a class="dropdown-item" href="{{ url_for('profile.profile_orders') }}">Orders</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('profile.profile_price_alerts') }}">Price
             alerts</a></li>
         <li>
             <hr class="dropdown-divider">

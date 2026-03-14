@@ -1,0 +1,24 @@
+<!-- Desktop categories nav -->
+<div class="row d-none d-lg-flex align-items-center">
+    <div class="col d-flex justify-content-start">
+        <ul class="nav mb-0">
+            {% for tag in left_tags %}
+            <li class="nav-item">
+                <a href="{{ url_for('home.catalog') }}?tags={{ tag }}" class="nav-link px-2 link-body-emphasis">{{
+                    tag }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="col text-center"></div> <!-- center spacer -->
+    <div class="col d-flex justify-content-end">
+        <ul class="nav mb-0">
+            {% for tag in right_tags %}
+            <li class="nav-item">
+                <a href="{{ url_for('home.catalog') }}?tags={{ tag }}" class="nav-link px-2 link-body-emphasis">{{
+                    tag }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>

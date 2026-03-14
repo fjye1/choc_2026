@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import current_user, AnonymousUserMixin
-from datetime import date, timedelta
+from flask_login import current_user, AnonymousUserMixin, login_required
+from datetime import date, timedelta, timezone, datetime
 from sqlalchemy import literal
-
+from ..services import product_service
 # Models
 from app.models import Product, Box, Shipment, Comment, PriceAlert, OrderItem, Orders
 
@@ -26,10 +26,11 @@ def product_test():
 
 @product_bp.route("/search")
 def search():
-    query = request.args.get("q", "").strip()
+    query = request.args.get("q", "").strip()[:100]
+
     if not query:
         flash("Please enter a search term.", "warning")
-        return redirect(url_for("main.home"))
+        return redirect(url_for("home.index"))
 
     results = Product.query.filter(
         Product.name.ilike(f"%{query}%")
@@ -129,3 +130,65 @@ def product_view(slug):
                            price_groups=price_groups,
                            next_box=next_box
                            )
+
+@product_bp.route('/price-alert', methods=['POST'])
+@login_required
+def set_price_alert():
+    # 1️⃣ Get form data
+    product_id = request.form.get('product_id')
+    target_price_raw = request.form.get('target_price', '').strip()
+
+    # 2️⃣ Load product via service (safe)
+    try:
+        product = ProductService.get_product_by_id(product_id)
+    except:
+        flash("Product not found.", "warning")
+        return redirect(url_for('home.index'))
+
+    # 3️⃣ Validate target price
+    try:
+        target_price = float(target_price_raw)
+    except ValueError:
+        flash("Please enter a valid target price.", "warning")
+        return redirect(url_for('product.product_view', slug=product.slug))
+
+    # 4️⃣ Find lowest floor price among boxes
+    lowest_box = (
+        Box.query
+        .filter_by(product_id=product.id)
+        .order_by(Box.floor_price_inr_unit.asc())
+        .first()
+    )
+
+    if not lowest_box:
+        flash("No boxes found for this product.", "warning")
+        return redirect(url_for('product.product_view', slug=product.slug))
+
+    # 5️⃣ Check target price against floor price
+    if target_price < lowest_box.floor_price_inr_unit:
+        flash(
+            f"Please enter a price above ₹{lowest_box.floor_price_inr_unit:.2f}",
+            "warning"
+        )
+        return redirect(url_for('product.product_view', slug=product.slug))
+
+    # 6️⃣ Create alert
+    expires_at = datetime.now(timezone.utc) + timedelta(days=30)
+    alert = PriceAlert(
+        user_id=current_user.id,
+        product_id=product.id,
+        target_price=target_price,
+        expires_at=expires_at
+    )
+    db.session.add(alert)
+    safe_commit()
+
+    # 7️⃣ Flash success
+    flash(
+        f"We'll email you when {product.name} drops to ₹{target_price:.2f}! "
+        "You can manage alerts in your profile.",
+        "success"
+    )
+
+    # ✅ Redirect to slug-based URL
+    return redirect(url_for('product.product_view', slug=product.slug))

@@ -5,14 +5,13 @@
             <!-- Mobile profile (under lg) -->
             <div class="col-4 d-lg-none">
                 {% if current_user.is_authenticated %}
-<!--                TODO rebuild this for the route to profile-->
-                    <a href="{{ url_for('profile.profile') }}">
-                        <img src="{{ current_user.email | gravatar }}" alt="Profile" height="34" class="rounded-circle">
-                    </a>
+                <a href="{{ url_for('profile.profile') }}">
+                    <img src="{{ current_user.email | gravatar }}" alt="Profile" height="34" class="rounded-circle">
+                </a>
                 {% else %}
-                    <a href="{{ url_for('auth.login') }}">
-                        <img src="{{ url_for('static', filename='images/profile_guest.svg') }}" alt="Guest" width="34">
-                    </a>
+                <a href="{{ url_for('auth.login') }}">
+                    <img src="{{ url_for('static', filename='images/profile_guest.svg') }}" alt="Guest" width="34">
+                </a>
                 {% endif %}
             </div>
 
@@ -20,32 +19,43 @@
             <div class="col-lg-4 d-none d-lg-flex">
                 <ul class="nav mb-0">
                     {% if admin %}
-                        <li class="nav-item">
-                            <a href="{{ url_for('admin.admin_test') }}" class="nav-link px-2 link-secondary">Admin</a>
-                        </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('admin.admin_test') }}" class="nav-link px-2 link-secondary">Admin</a>
+                    </li>
                     {% endif %}
                     {% if not current_user.is_authenticated %}
-                        <li class="nav-item"><a href="{{ url_for('auth.register') }}" class="nav-link px-2 link-secondary">Register</a></li>
-                        <li class="nav-item"><a href="{{ url_for('auth.login') }}" class="nav-link px-2 link-body-emphasis">Login</a></li>
+                    <li class="nav-item"><a href="{{ url_for('auth.register') }}" class="nav-link px-2 link-secondary">Register</a>
+                    </li>
+                    <li class="nav-item"><a href="{{ url_for('auth.login') }}" class="nav-link px-2 link-body-emphasis">Login</a>
+                    </li>
                     {% endif %}
-                    <li class="nav-item"><a href="{{ url_for('home.index') }}" class="nav-link px-2 link-body-emphasis">Home</a></li>
-                    <li class="nav-item"><a href="{{ url_for('home.catalog') }}" class="nav-link px-2 link-body-emphasis">Products</a></li>
+                    <li class="nav-item"><a href="{{ url_for('home.index') }}" class="nav-link px-2 link-body-emphasis">Home</a>
+                    </li>
+                    <li class="nav-item"><a href="{{ url_for('home.catalog') }}"
+                                            class="nav-link px-2 link-body-emphasis">Products</a></li>
                 </ul>
             </div>
 
             <!-- Center logo -->
             <div class="col-4 col-lg-4 text-center">
                 <a href="{{ url_for('home.index') }}">
-                    <img src="{{ url_for('static', filename='images/Logo_SVG.svg') }}" alt="Logo" class="img-fluid" style="max-height: 200px;">
+                    <img src="{{ url_for('static', filename='images/Logo_SVG.svg') }}" alt="Logo" class="img-fluid"
+                         style="max-height: 200px;">
                 </a>
             </div>
 
             <!-- Right section: desktop search + cart -->
             <div class="col-4 col-lg-4 text-end d-flex justify-content-end align-items-center gap-2">
+
                 <div class="d-none d-lg-flex">
-                    {% include 'partials/search_form.html' %}
+                    {% include 'partials/_search_form.html' %}
                 </div>
-                {% include 'partials/cart_icon.html' %}
+
+                {% include 'partials/_cart_icon.html' %}
+
+                {% include 'partials/_user_dropdown.html' %}
+
+
             </div>
 
         </div>
@@ -57,35 +67,12 @@
     <div class="container">
 
         <!-- Desktop categories nav -->
-        <div class="row d-none d-lg-flex align-items-center">
-            <div class="col d-flex justify-content-start">
-                <ul class="nav mb-0">
-                    {% for tag in left_tags %}
-                        <li class="nav-item">
-                            <a href="{{ url_for('home.catalog') }}?tags={{ tag }}" class="nav-link px-2 link-body-emphasis">{{ tag }}</a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <div class="col text-center"></div> <!-- center spacer -->
-            <div class="col d-flex justify-content-end">
-                <ul class="nav mb-0">
-                    {% for tag in right_tags %}
-                        <li class="nav-item">
-                            <a href="{{ url_for('home.catalog') }}?tags={{ tag }}" class="nav-link px-2 link-body-emphasis">{{ tag }}</a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
+        {% include 'partials/_categories_nav.html' %}
+
 
         <!-- Mobile search (replaces categories nav) -->
         <div class="d-lg-none py-2">
-<!--            TODO replace this with the URL for Search-->
-            <form role="search" action="{{ url_for('auth.login') }}" method="GET">
-                <input type="search" name="q" class="form-control" placeholder="Search products..." aria-label="Search">
-            </form>
+            {% include 'partials/_search_form.html' %}
         </div>
-
     </div>
 </div>

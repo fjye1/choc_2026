@@ -1,34 +1,5 @@
-# from flask import Blueprint, render_template, redirect, url_for, flash, request
-# from flask_login import login_user
-# from app.models import User  # your User model
-# from app.forms import LoginForm  # your WTForms login form
-#
-# login_bp = Blueprint('login', __name__)
-#
-#
-# @login_bp.route('/login', methods=['GET', 'POST'])
-# def login():
-#     form = LoginForm()
-#
-#     if form.validate_on_submit():
-#         user = User.query.filter_by(email=form.email.data).first()
-#
-#         if user and user.check_password(form.password.data):
-#             login_user(user, remember=form.remember_me.data)
-#             flash("Logged in successfully!", "success")
-#
-#             next_page = request.args.get('next')
-#             return redirect(next_page or url_for('home.index'))
-#
-#         flash("Invalid email or password.", "danger")
-#
-#     return render_template("login.html", form=form)
-
-
-
-# app/routes/auth.py
 from flask import Blueprint, render_template, flash, redirect, url_for, session
-from flask_login import login_user, current_user
+from flask_login import login_user, current_user, login_required, logout_user
 from app.extensions import login_manager, db, safe_commit
 from app.models import User, Cart,CartItem
 from app.forms import RegisterForm, LoginForm
@@ -113,3 +84,9 @@ def register():
 
     # 7 Render the template
     return render_template("auth/register.html", form=form)
+
+@auth_bp.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('home.index'))

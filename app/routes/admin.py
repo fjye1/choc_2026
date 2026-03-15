@@ -1,63 +1,30 @@
 from flask import Blueprint, render_template
-from flask import render_template
-from flask_login import login_required
-from sqlalchemy import func, cast, Date
-from datetime import datetime, timedelta, timezone
+from flask_login import login_required, current_user
 from app.decorators import admin_only
-
-from app.models import Orders
-from app import db
-
-
+from app.services.product_service import get_admin_product_data
+from app.services.cart_service import get_admin_cart
+from datetime import date, timedelta
+from app.services.order_service import get_unfulfilled_orders
+from app.services.sales_service import get_sales_last_n_days
+from app.services.user_service import get_admin_user_data
+from app.utils.chart_utils import format_sales_for_chart
 
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+
 
 @admin_bp.route('/test')
 def admin_test():
     return render_template('admin/admin_test.html')
 
+
 @admin_bp.route("/")
 @login_required
 @admin_only
 def dashboard():
-
-    today = datetime.now(timezone.utc).date()
-    start_date = today - timedelta(days=27)
-
-    if db.engine.name == "sqlite":
-        sales_data = (
-            db.session.query(
-                func.date(Orders.created_at).label("date"),
-                func.sum(Orders.total_amount).label("sales")
-            )
-            .filter(func.date(Orders.created_at) >= start_date)
-            .filter(func.date(Orders.created_at) <= today)
-            .group_by(func.date(Orders.created_at))
-            .order_by(func.date(Orders.created_at))
-            .all()
-        )
-    else:
-        sales_data = (
-            db.session.query(
-                cast(Orders.created_at, Date).label("date"),
-                func.sum(Orders.total_amount).label("sales")
-            )
-            .filter(cast(Orders.created_at, Date) >= start_date)
-            .filter(cast(Orders.created_at, Date) <= today)
-            .group_by("date")
-            .order_by("date")
-            .all()
-        )
-
-    sales_dict = {d: s or 0 for d, s in sales_data}
-
-    day_labels = [(start_date + timedelta(days=i)).strftime("%d %b") for i in range(28)]
-    sales_values = [sales_dict.get(start_date + timedelta(days=i), 0) for i in range(28)]
-
-    total_sales_last_28_days = sum(sales_values)
-
-    orders = Orders.query.filter(Orders.tracking_number.is_(None)).all()
+    sales_data, start_date = get_sales_last_n_days(n=28)
+    day_labels, sales_values, total_sales_last_28_days = format_sales_for_chart(sales_data, start_date)
+    orders = get_unfulfilled_orders()
 
     return render_template(
         "admin/dashboard.html",
@@ -66,3 +33,32 @@ def dashboard():
         day_labels=day_labels,
         sales_values=sales_values
     )
+
+
+@admin_bp.route("/admin-cart", methods=["GET", "POST"])
+@login_required
+@admin_only
+def admin_cart():
+    items, total = get_admin_cart(current_user)
+    return render_template("admin/admin_cart.html", items=items, total=total)
+
+
+@admin_bp.route("/products")
+@login_required
+@admin_only
+def admin_products():
+    products = get_admin_product_data(days_back=28)
+    return render_template(
+        "admin/admin_products.html",
+        products=products,
+        date=date,
+        timedelta=timedelta
+    )
+
+
+@admin_bp.route("/users")
+@login_required
+@admin_only
+def admin_users():
+    results = get_admin_user_data()
+    return render_template("admin/admin_users.html", results=results)

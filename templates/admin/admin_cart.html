@@ -1,0 +1,51 @@
+{% extends "admin/admin_base.html" %}
+{% block title %}Admin cart{% endblock %}
+{% block admin_block %}
+<h2>Admin Cart</h2>
+
+{% if items %}
+<ul style="list-style: none; padding: 0;">
+    {% for item in items %}
+    <li style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;" data-product-id="{{ item.product.id }}">
+        <img src="/{{ item.product.image }}" alt="{{ item.product.name }}"
+             style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px;">
+
+        <strong>{{ item.product.name }}</strong> –
+        Qty: <input type="number" class="quantity" value="{{ item.quantity }}" min="1" style="width: 60px;">
+        Price: ₹<input type="number" class="unit-price" value="{{ item.price }}" step="0.01" style="width: 80px;">
+        Cost Price ₹
+        <span class="line-total">₹{{ '%.2f' % (item.price * item.quantity) }}</span>
+
+        {% if item.cart_item_id %}
+        <form action="{{ url_for('remove_cart_item', item_id=item.cart_item_id) }}" method="POST" style="display:inline;">
+            <button type="submit" class="btn btn-sm btn-danger" style="padding: 0 6px; font-weight: bold;">X</button>
+        </form>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+
+<h4>Total: ₹<span id="cart-total">{{ '%.2f' % total }}</span></h4>
+
+{% if current_user.is_authenticated %}
+<!--TODO build checkout route-->
+<form action="{{ url_for('checkout') }}" method="POST" id="checkout-form">
+    <button class="btn btn-success">Proceed to Checkout</button>
+</form>
+{% else %}
+<p>
+    <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Register to checkout</a>
+</p>
+<p>
+    <a href="{{ url_for('auth.login') }}" class="btn btn-success">login to checkout</a>
+</p>
+{% endif %}
+
+
+<script src="{{ url_for('static', filename='js/admin_cart.js') }}"></script>
+
+
+{% else %}
+<p>Your cart is empty.</p>
+{% endif %}
+{% endblock %}

@@ -1,14 +1,16 @@
-from flask import g
+from flask import g, session
 from sqlalchemy.orm import joinedload
-from app.models import Cart
 from datetime import datetime, timezone
+from app.models import Cart, Box, CartItem
 from app.extensions import db, safe_commit
-from flask import session
-from app.models import Box, CartItem
+
+
 def get_user_cart_cached(user_id):
+    """Fetch the cart from DB and cache it in `g`."""
     if not hasattr(g, 'cart'):
         g.cart = Cart.query.options(joinedload(Cart.items)).filter_by(user_id=user_id).first()
     return g.cart
+
 
 def merge_session_basket_to_cart(user):
     """Merge session['basket'] into the DB cart for this user."""
@@ -41,5 +43,6 @@ def merge_session_basket_to_cart(user):
                 price=box.price_inr_unit
             )
             db.session.add(new_item)
+
     safe_commit()
     session.pop('basket', None)

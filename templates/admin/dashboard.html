@@ -1,5 +1,5 @@
 {% extends "admin/admin_base.html" %}
-{% block title %}Admin Home{% endblock %}
+{% block title %}Admin dashboard{% endblock %}
 
 {% block admin_block %}
 
@@ -78,7 +78,7 @@
     const salesValues = {{ sales_values | tojson }};
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script src="{{ url_for('static', filename='js/admin_dashboard.js') }}"></script>
 
 
 {% endblock %}

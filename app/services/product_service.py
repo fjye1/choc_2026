@@ -1,9 +1,17 @@
-from app.models import Product
+from datetime import date, datetime, timedelta, timezone
+
+from sqlalchemy import func
+from sqlalchemy.orm import joinedload, subqueryload
+
+from app.extensions import db
+from app.models import Product, PriceAlert, Box
+
 
 class ProductService:
     @staticmethod
     def get_product_by_slug(slug):
         return Product.query.filter_by(slug=slug).first_or_404()
+
     """
     Service layer that abstracts Product data access.
     Routes talk to this service, not directly to the model.
@@ -47,3 +55,70 @@ class ProductService:
                 'floor_price': product.floor_price
             }
         }
+
+
+def get_admin_product_data(days_back=28):
+    """Returns a list of products with aggregated data for admin dashboard"""
+    now = datetime.now(timezone.utc)
+    start_date = date.today() - timedelta(days=days_back)
+
+    products = Product.query.options(joinedload(Product.boxes).joinedload(Box.sales_history)).all()
+
+    for product in products:
+        active_boxes = [b for b in product.boxes if b.is_active]
+        product.has_active_boxes = bool(active_boxes)
+
+        # total quantity
+        total_quantity = sum(b.quantity for b in active_boxes)
+        product.total_quantity = total_quantity
+
+        # average unit price
+        product.avg_price = (
+                sum(b.price_inr_unit * b.quantity for b in active_boxes) / total_quantity
+        ) if total_quantity else 0
+
+        # earliest expiration
+        earliest_box = min(
+            (b for b in active_boxes if b.expiration_date),
+            key=lambda b: b.expiration_date,
+            default=None
+        )
+        product.earliest_expiry = earliest_box.expiration_date if earliest_box else None
+        product.days_left = (earliest_box.expiration_date - date.today()).days if earliest_box else None
+
+        # default expiration for boxes without one
+        for box in active_boxes:
+            if not box.expiration_date:
+                box.expiration_date = date.today() + timedelta(days=30)
+            box.days_left = (box.expiration_date - date.today()).days
+
+        # dynamic pricing
+        product.dynamic_pricing_enabled = any(b.dynamic_pricing_enabled for b in active_boxes)
+
+        # tag names
+        product.tag_names = ', '.join([t.name for t in product.tags])
+
+        # recent sales
+        recent_sales = [s for b in active_boxes for s in b.sales_history if s.date >= start_date]
+        product.recent_sales = sorted(recent_sales, key=lambda s: s.date)
+
+        # revenue, cost, profit
+        product.total_revenue = sum(s.sold_quantity * s.sold_price for s in recent_sales)
+        product.total_cost = sum(s.sold_quantity * (s.floor_price or 0) for s in recent_sales)
+        product.profit = product.total_revenue - product.total_cost
+        product.profit_percent = (product.profit / product.total_revenue * 100) if product.total_revenue else 0
+
+        # average alert price
+        avg_alert_price = (
+            db.session.query(func.avg(PriceAlert.target_price))
+            .filter(
+                PriceAlert.product_id == product.id,
+                PriceAlert.expires_at > now
+            ).scalar()
+        )
+        product.avg_alert_price = round(avg_alert_price or 0, 2)
+
+    # sort by profit percentage descending
+    products.sort(key=lambda p: p.profit_percent, reverse=True)
+
+    return products

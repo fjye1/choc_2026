@@ -8,11 +8,15 @@
         <div class="col-md-3">
             <div class="list-group">
 <!--                TODO Clean up these routes so they go to the correct location-->
-                <a href="{{ url_for('admin.dashboard') }}" class="list-group-item list-group-item-action">View Shipments</a>
-                <a href="{{ url_for('admin.admin_cart') }}" class="list-group-item list-group-item-action">Admin Cart</a>
                 <a href="{{ url_for('admin.dashboard') }}" class="list-group-item list-group-item-action">Admin Home</a>
+                <a href="{{ url_for('admin.create_shipment') }}" class="list-group-item list-group-item-action">Create Shipments</a>
+                <a href="{{ url_for('admin.view_shipments') }}" class="list-group-item list-group-item-action">View Shipments</a>
+                <a href="{{ url_for('admin.admin_products') }}" class="list-group-item list-group-item-action">Create Product</a>
+                <a href="{{ url_for('admin.admin_products') }}" class="list-group-item list-group-item-action">View Product</a>
+                <a href="{{ url_for('admin.admin_products') }}" class="list-group-item list-group-item-action">Edit Product</a>
+                <a href="{{ url_for('admin.admin_cart') }}" class="list-group-item list-group-item-action">Admin Cart</a>
+
                 <a href="{{ url_for('admin.dashboard') }}" class="list-group-item list-group-item-action">Order Archive</a>
-                <a href="{{ url_for('admin.admin_products') }}" class="list-group-item list-group-item-action">Product</a>
                 <a href="{{ url_for('admin.admin_users') }}" class="list-group-item list-group-item-action">Users</a>
                 <a href="{{ url_for('admin.dashboard') }}" class="list-group-item list-group-item-action">Support</a>
                 <a href="{{ url_for('admin.dashboard') }}" class="list-group-item list-group-item-action">Settings</a>

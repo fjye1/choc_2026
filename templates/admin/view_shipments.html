@@ -1,0 +1,83 @@
+{% extends "admin/admin_base.html" %}
+{% block title %}All Shipments{% endblock %}
+
+{% block admin_block %}
+<div class="container mt-4">
+    <h2>All Shipments</h2>
+    <p> Please note the conversion cost from INR to GBP takes place on the day the shipment lands; this is a rough guide
+        for box profitability. </p>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Date Created</th>
+            <th>UK Price</th>
+            <th>Weight (Kg)</th>
+            <th>Transit Cost (£)</th>
+            <th>Tariff Cost (£)</th>
+            <th>Total Cost (£)</th>
+            <th>Arrived?</th>
+            <th>Profit (£)</th>
+            <th>Has Arrived</th>
+            <th>Delete shipment</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for shipment in shipments %}
+        <tr>
+            <td>{{ shipment.id }}</td>
+            <td>{{ shipment.date_created.strftime("%Y-%m-%d") }}</td>
+
+            <!-- UK Price -->
+            <td>{{ "%.2f"|format(shipment.total_product_cost) }}</td>
+
+            <!-- Weight -->
+            <td>{{ "%.3f"|format(shipment.total_weight / 1000) }}</td>
+
+            <!-- Transit Cost -->
+            <td>{{ "%.2f"|format(shipment.transit_cost) }}</td>
+
+            <!-- Tariff Cost -->
+            <td>{{ "%.2f"|format(shipment.tariff_cost_gbp) }}</td>
+
+            <!-- Total Cost -->
+            <td>{{ "%.2f"|format(shipment.total_cost) }}</td>
+
+            <!-- Arrived Section -->
+            <td>
+                {% if shipment.has_arrived %}
+                Yes ({{ shipment.date_arrived.strftime("%Y-%m-%d") }})
+                {% else %}
+                No
+                {% endif %}
+            </td>
+
+            <!-- Profit -->
+            <td>{{ "%.2f"|format(shipment.profitability) }}</td>
+
+            <td>
+                {% if not shipment.has_arrived %}
+                <!-- TODO build route for ('admin.mark_shipment_arrived', shipment_id=shipment.id)-->
+                <form method="POST" action="{{ url_for('admin.dashboard') }}" class="d-inline">
+                    <button type="submit" class="btn btn-success btn-sm">Mark as Arrived</button>
+                </form>
+                {% else %}
+                <span class="text-muted">True</span>
+                {% endif %}
+
+            </td>
+            <td>
+                <!-- Delete shipment button -->
+                <form method="POST" action="{{ url_for('admin.delete_shipment', shipment_id=shipment.id) }}"
+                      class="d-inline"
+                      onsubmit="return confirm('Are you sure you want to delete this shipment and all its boxes?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

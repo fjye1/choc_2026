@@ -1,0 +1,18 @@
+{% extends "admin/admin_base.html" %}
+{% block title %}Create Shipment{% endblock %}
+
+{% block admin_block %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 60vh;">
+    <div class="card p-4 shadow-sm" style="width: 400px;">
+        <h2 class="text-center mb-4">Create Shipment</h2>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                {{ form.transit_cost.label(class="form-label") }}
+                {{ form.transit_cost(class="form-control") }}
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Create Shipment</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

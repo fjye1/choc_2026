@@ -1,0 +1,84 @@
+{% extends "admin/admin_base.html" %}
+{% block title %}Admin Home{% endblock %}
+
+{% block admin_block %}
+
+<div class="row">
+
+    <!-- Sales Chart -->
+    <div class="row mt-4">
+
+        <div class="col-md-9">
+            <h3>Last 28 Days Sales</h3>
+            <canvas id="salesChart"></canvas>
+        </div>
+
+        <div class="col-md-3 text-center">
+            <h3>Total Sales Last 28 Days</h3>
+            <h1>₹{{ total | round(2) }}</h1>
+        </div>
+
+    </div>
+
+    <!-- Orders -->
+    <div class="container mt-4">
+        <h2>All Orders</h2>
+
+        <table class="table table-bordered table-hover mt-3">
+            <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>User</th>
+                <th>Date</th>
+                <th>Total (₹)</th>
+                <th>Status</th>
+                <th>View</th>
+                <th>Tracking</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.order_id }}</td>
+                <td>{{ order.user.name }}</td>
+                <td>{{ order.order_date.strftime("%Y-%m-%d %H:%M") }}</td>
+                <td>{{ "%.2f"|format(order.total_amount) }}</td>
+                <td>{{ order.status }}</td>
+
+                <td>
+                    <!--                        TODO build the route for Invoice ('admin.invoice', order_id=order.order_id)-->
+                    <a href="{{ url_for('admin.dashboard') }}"
+                       class="btn btn-sm btn-primary">View</a>
+                </td>
+
+                <td>
+                    {% if order.tracking_number %}
+                    <button class="btn btn-success btn-sm" disabled>Sent</button>
+                    {% else %}
+                    <!--                        TODO add route for ('admin.add_tracking', order_id=order.order_id)-->
+                    <a href="{{ url_for('admin.dashboard') }}"
+                       class="btn btn-danger btn-sm">Add Tracking</a>
+                    {% endif %}
+                </td>
+
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<!--TODO rebuild route to run Dynamic_pricing ('admin.run_dynamic_pricing')-->
+<form action="{{ url_for('admin.dashboard') }}" method="get">
+    <button type="submit" class="btn btn-warning">Run Dynamic Pricing</button>
+</form>
+<script>
+    const dayLabels = {{ day_labels | tojson }};
+    const salesValues = {{ sales_values | tojson }};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+
+
+{% endblock %}

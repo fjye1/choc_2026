@@ -20,7 +20,7 @@
                 <ul class="nav mb-0">
                     {% if admin %}
                     <li class="nav-item">
-                        <a href="{{ url_for('admin.admin_test') }}" class="nav-link px-2 link-secondary">Admin</a>
+                        <a href="{{ url_for('admin.dashboard') }}" class="nav-link px-2 link-secondary">Admin</a>
                     </li>
                     {% endif %}
                     {% if not current_user.is_authenticated %}

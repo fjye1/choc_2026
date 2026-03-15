@@ -8,12 +8,10 @@
         <!-- Sidebar -->
         <div class="col-md-3">
             <div class="list-group">
-<!--                TODO update these routes for the pages when the are finished-->
                 <a href="{{ url_for('profile.profile') }}" class="list-group-item list-group-item-action">Profile</a>
                 <a href="{{ url_for('profile.profile_orders') }}" class="list-group-item list-group-item-action">Orders</a>
                 <a href="{{ url_for('profile.profile_price_alerts') }}" class="list-group-item list-group-item-action">Price alerts</a>
                 <a href="{{ url_for('profile.profile_addresses') }}" class="list-group-item list-group-item-action">Addresses</a>
-<!--                TODO build an AUTH log out route-->
                 <a href="{{ url_for('auth.logout') }}" class="list-group-item list-group-item-action">Logout</a>
             </div>
         </div>

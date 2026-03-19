@@ -1,0 +1,95 @@
+{% extends "admin/admin_base.html" %}
+{% block title %}Create Shipment{% endblock %}
+
+{% block admin_block %}
+<div class="container mt-4">
+    <h2>Create New Product</h2>
+    <h5 class="text-muted mb-4">
+        This form creates a new product it does not alter existing products.
+    </h5>
+
+    <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+
+        <!-- Basic Info -->
+        <div class="mb-3">
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control") }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.description.label(class="form-label") }}
+            {{ form.description(class="form-control") }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.image.label(class="form-label") }}
+            {{ form.image(class="form-control") }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.weight_per_unit.label(class="form-label") }}
+            {{ form.weight_per_unit(class="form-control") }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.ingredients.label(class="form-label") }}
+            {{ form.ingredients(class="form-control", rows="3") }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.allergens.label(class="form-label") }}
+            {{ form.allergens(class="form-control") }}
+            <small class="text-muted">Enter comma-separated (e.g., milk, peanuts, soy)</small>
+        </div>
+
+        <!-- Nutrition Grid -->
+        <fieldset class="mb-3">
+            <legend>Nutrition (per 100g)</legend>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    {{ form.energy_kj.label(class="form-label") }}
+                    {{ form.energy_kj(class="form-control") }}
+                </div>
+                <div class="col-md-3">
+                    {{ form.energy_kcal.label(class="form-label") }}
+                    {{ form.energy_kcal(class="form-control") }}
+                </div>
+                <div class="col-md-3">
+                    {{ form.fat_g.label(class="form-label") }}
+                    {{ form.fat_g(class="form-control") }}
+                </div>
+                <div class="col-md-3">
+                    {{ form.saturates_g.label(class="form-label") }}
+                    {{ form.saturates_g(class="form-control") }}
+                </div>
+
+                <div class="col-md-3">
+                    {{ form.carbs_g.label(class="form-label") }}
+                    {{ form.carbs_g(class="form-control") }}
+                </div>
+                <div class="col-md-3">
+                    {{ form.sugars_g.label(class="form-label") }}
+                    {{ form.sugars_g(class="form-control") }}
+                </div>
+                <div class="col-md-3">
+                    {{ form.fibre_g.label(class="form-label") }}
+                    {{ form.fibre_g(class="form-control") }}
+                </div>
+                <div class="col-md-3">
+                    {{ form.protein_g.label(class="form-label") }}
+                    {{ form.protein_g(class="form-control") }}
+                </div>
+                <div class="col-md-3">
+                    {{ form.salt_g.label(class="form-label") }}
+                    {{ form.salt_g(class="form-control") }}
+                </div>
+            </div>
+        </fieldset>
+
+        <button type="submit" class="btn btn-primary mt-3">Create Product</button>
+    </form>
+</div>
+
+
+{% endblock %}

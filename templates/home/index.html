@@ -18,8 +18,8 @@
 {% if current_user.admin %}
 <div class="text-center mb-3">
 <!--    TODO reroute these to Create_shopment & Create product-->
-    <a href="{{ url_for('auth.login') }}" class="btn btn-primary me-2">+ Create New Shipment</a>
-    <a href="{{ url_for('auth.login') }}" class="btn btn-primary">+ Create New Product</a>
+    <a href="{{ url_for('admin.create_shipment') }}" class="btn btn-primary me-2">+ Create New Shipment</a>
+    <a href="{{ url_for('admin.create_product') }}" class="btn btn-primary">+ Create New Product</a>
 </div>
 {% endif %}
 

@@ -1,11 +1,9 @@
 from datetime import date, datetime, timedelta, timezone
-
 from sqlalchemy import func
 from sqlalchemy.orm import joinedload, subqueryload
-
 from app.extensions import db
-from app.models import Product, PriceAlert, Box
-
+from app.models import Product, PriceAlert, Box, Tag
+from app.utils.images import save_product_image
 
 class ProductService:
     @staticmethod
@@ -55,6 +53,50 @@ class ProductService:
                 'floor_price': product.floor_price
             }
         }
+
+    @staticmethod
+    def update_product_from_form(product, form):
+        """Update product fields from admin form."""
+
+        product.name = form.name.data
+        product.description = form.description.data
+
+        # Image upload
+        ProductService._handle_image_upload(product, form.image.data)
+
+        # Tags
+        ProductService._update_tags(product, form.tags.data)
+
+    @staticmethod
+    def _handle_image_upload(product, image_file):
+        """Handles optional image upload"""
+
+        if not image_file or not getattr(image_file, "filename", None):
+            return
+
+        rel_image, rel_pdf = save_product_image(image_file)
+
+        if rel_image:
+            product.image = rel_image
+        if rel_pdf:
+            product.pdf_image = rel_pdf
+
+    @staticmethod
+    def _update_tags(product, tag_string):
+
+        tag_names = [n.strip() for n in tag_string.split(",") if n.strip()]
+        tag_objects = []
+
+        for name in tag_names:
+            tag = Tag.query.filter_by(name=name).first()
+
+            if not tag:
+                tag = Tag(name=name)
+                db.session.add(tag)
+
+            tag_objects.append(tag)
+
+        product.tags = tag_objects
 
 
 def get_admin_product_data(days_back=28):

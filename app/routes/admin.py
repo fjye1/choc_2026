@@ -1,18 +1,21 @@
-from flask import Blueprint, render_template, flash, redirect, url_for
+from flask import Blueprint, render_template, flash, redirect, url_for, request
 from flask_login import login_required, current_user
 from app.decorators import admin_only
 from app.services.product_service import get_admin_product_data
 from app.services.cart_service import get_admin_cart
 from datetime import date, timedelta
+from app.services.product_service import ProductService
 from app.services.order_service import get_unfulfilled_orders
 from app.services.sales_service import get_sales_last_n_days
 from app.services.user_service import get_admin_user_data
 from app.services.shipment_service import get_all_shipments_admin, add_box_to_shipment
 from app.utils.chart_utils import format_sales_for_chart
-from app.forms import ShipmentSentForm, BoxForm
-from app.models import Shipment, Product, Box
+from app.utils.images import save_product_image
+from app.forms import ShipmentSentForm, BoxForm, ProductForm
+from app.models import Shipment, Product, Box, Orders
 from app.extensions import db, safe_commit
-
+from slugify import slugify
+import json
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -50,10 +53,10 @@ def admin_cart():
 @admin_bp.route("/products")
 @login_required
 @admin_only
-def admin_products():
+def view_product():
     products = get_admin_product_data(days_back=28)
     return render_template(
-        "admin/admin_products.html",
+        "admin/view_product.html",
         products=products,
         date=date,
         timedelta=timedelta
@@ -65,7 +68,7 @@ def admin_products():
 @admin_only
 def admin_users():
     results = get_admin_user_data()
-    return render_template("admin/admin_users.html", results=results)
+    return render_template("admin/users.html", results=results)
 
 
 @admin_bp.route("/shipments")
@@ -152,6 +155,118 @@ def delete_shipment(shipment_id):
     db.session.commit()
     flash("Shipment and all its boxes have been deleted.", "success")
     return redirect(url_for("admin.view_shipments"))  # redirect to a shipment overview page
+
+
+@admin_bp.route('/delete-product/<int:product_id>', methods=['POST'])
+@login_required
+@admin_only
+def delete_product(product_id):
+    product = ProductService.get_product_by_id(product_id)
+    if not product:
+        flash("Product not found.", "danger")
+        return redirect(url_for('admin.view_products'))
+
+    if product.order_items:
+        # Soft delete if product has been sold
+        product.is_active = False
+        safe_commit()
+        flash(f"Product '{product.name}' has orders; soft deleted (hidden).", "warning")
+    else:
+        # Hard delete if no orders
+        db.session.delete(product)
+        safe_commit()
+        flash(f"Product '{product.name}' was permanently deleted.", "success")
+
+    return redirect(url_for('admin.view_products'))
+
+
+@admin_bp.route('/create-product', methods=['GET', 'POST'])
+@login_required
+@admin_only
+def create_product():
+    form = ProductForm()
+    if form.validate_on_submit():
+        rel_image, rel_pdf_image = save_product_image(form.image.data)
+
+        new_product = Product(
+            name=form.name.data,
+            description=form.description.data,
+            weight_per_unit=float(form.weight_per_unit.data),
+            image=rel_image,
+            pdf_image=rel_pdf_image,
+            ingredients=form.ingredients.data,
+            allergens=json.dumps([a.strip() for a in (form.allergens.data or "").split(',') if a.strip()]),
+            energy_kj=form.energy_kj.data,
+            energy_kcal=form.energy_kcal.data,
+            fat_g=form.fat_g.data,
+            saturates_g=form.saturates_g.data,
+            carbs_g=form.carbs_g.data,
+            sugars_g=form.sugars_g.data,
+            fibre_g=form.fibre_g.data,
+            protein_g=form.protein_g.data,
+            salt_g=form.salt_g.data,
+            slug=slugify(form.name.data)
+        )
+
+        db.session.add(new_product)
+        db.session.flush()  # get ID without commit
+        new_product.slug = f"{slugify(form.name.data)}-{new_product.id}"
+        safe_commit()
+
+        flash("Product created!", "success")
+        return redirect(url_for("admin.view_products"))
+
+    return render_template('admin/create_product.html', form=form)
+
+
+@admin_bp.route('/archive')
+@login_required
+@admin_only
+def archive():
+    orders = Orders.query.filter(Orders.tracking_number.isnot(None)) \
+                         .order_by(Orders.created_at.desc()) \
+                         .all()
+    return render_template("admin/archive.html", orders=orders)
+
+@admin_bp.route("/edit/<int:product_id>", methods=["GET", "POST"])
+@login_required
+@admin_only
+def edit_product(product_id):
+
+    product = db.get_or_404(Product, product_id)
+    form = ProductForm(obj=product)
+
+    if request.method == "GET":
+        form.tags.data = ", ".join(tag.name for tag in product.tags)
+
+    if form.validate_on_submit():
+
+        ProductService.update_product_from_form(product, form)
+
+        safe_commit()
+
+        return redirect(url_for("admin.view_products"))
+
+    return render_template(
+        "admin/edit_product.html",
+        form=form,
+        product=product
+    )
+
+
+
+@admin_bp.route("/settings")
+@login_required
+@admin_only
+def settings():
+    return render_template("admin/settings.html")
+
+
+@admin_bp.route("/support")
+@login_required
+@admin_only
+def support():
+    return render_template("admin/support.html")
 
 # @main_bp.route("/cart", methods=["GET", "POST"])
 # def user_cart():

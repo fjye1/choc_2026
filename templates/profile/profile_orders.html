@@ -19,8 +19,8 @@
             <strong>Tracking:</strong> {{ order.tracking_number }}
         </div>
         {% endif %}
-        <!--        TODO replace this with the Invoice link # ('invoice', order_id=order.order_id)-->
-        <a href="{{ url_for('profile.profile') }}" class="btn btn-primary btn-sm">View</a>
+
+        <a href="{{ url_for('orders.invoice', order_id=order.order_id) }}" class="btn btn-primary btn-sm">View</a>
     </li>
     {% endfor %}
 </ul>

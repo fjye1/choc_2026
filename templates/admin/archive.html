@@ -29,8 +29,8 @@
                     <td>{{ "%.2f"|format(order.total_amount) }}</td>
                     <td>{{ order.status }}</td>
                     <td>
-<!--                        TODO build route for ('invoice', order_id=order.order_id)-->
-                        <a href="{{ url_for('admin.dashboard') }}"
+
+                        <a href="{{ url_for('orders.invoice', order_id=order.order_id) }}"
                            class="btn btn-sm btn-primary">View</a>
                     </td>
                     <td>

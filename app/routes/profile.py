@@ -28,7 +28,7 @@ def profile_orders():
         orders=orders
     )
 
-# ('invoice', order_id=order.order_id)
+
 
 @profile_bp.route('/profile/address', methods=["GET", "POST"])
 @login_required

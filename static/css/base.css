@@ -45,3 +45,33 @@ img {
   height: auto;
 }
 
+/* ------------------ Animation ------------------ */
+.logo {
+  width: 200px;
+  height: 200px;
+  background: url("/static/images/logo_sprite.png") no-repeat;
+  background-size: 3000px 200px; /* 14 frames × 200px wide each */
+}
+
+/* center the logo animation inside this specific link */
+.logo-link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px; /* match logo height */
+  width: 100%;   /* optional to fill parent column */
+}
+
+.logo-link .logo {
+  display: block;   /* ensures it respects centering */
+}
+
+/* animate only if the class "animate" is present */
+.logo.animate {
+  animation: logo-frames 3s steps(14) forwards;
+}
+
+@keyframes logo-frames {
+  from { background-position: 0 0; }
+  to   { background-position: -2800px 0; }
+}

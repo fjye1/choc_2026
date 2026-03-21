@@ -37,10 +37,10 @@
             </div>
 
             <!-- Center logo -->
+            <!-- Logo Animation -->
             <div class="col-4 col-lg-4 text-center">
-                <a href="{{ url_for('home.index') }}">
-                    <img src="{{ url_for('static', filename='images/Logo_SVG.svg') }}" alt="Logo" class="img-fluid"
-                         style="max-height: 200px;">
+                <a href="{{ url_for('home.index') }}" class="logo-link">
+                    <div id="logo" class="logo"></div>
                 </a>
             </div>
 

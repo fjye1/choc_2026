@@ -1,8 +1,27 @@
 from flask import render_template, current_app
-import io
-from xhtml2pdf import pisa
+import platform
 import os
+import pdfkit
+from dotenv import load_dotenv
+load_dotenv()
 
+# ----------------------------
+# System Detection helper
+# ----------------------------
+
+def get_pdfkit_config():
+    """Return a pdfkit configuration object depending on OS."""
+    system = platform.system()
+
+    if system == "Windows":
+        wkhtmltopdf_path = os.getenv("WINDOWS_PATH")
+    else:
+        wkhtmltopdf_path = os.getenv("LINUX_PATH")
+
+    if not wkhtmltopdf_path or not os.path.exists(wkhtmltopdf_path):
+        raise FileNotFoundError(f"wkhtmltopdf not found at {wkhtmltopdf_path}")
+
+    return pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
 
 def serialize_order(order, url_root):
     return {
@@ -47,9 +66,11 @@ def link_callback(uri, rel):
 
 
 def generate_invoice_pdf(order):
-    html = render_template('orders/invoice.html', order=order)
-    result = io.BytesIO()
-    pisa_status = pisa.CreatePDF(html, dest=result, link_callback=link_callback)
-    if pisa_status.err:
-        raise Exception("PDF generation failed")
-    return result.getvalue()
+    # Render invoice HTML
+    html = render_template('orders/invoice.html', order=order, url_root=current_app.config.get('URL_ROOT'))
+
+    # Generate PDF using pdfkit/wkhtmltopdf
+    config = get_pdfkit_config()  # your existing function returning pdfkit configuration
+    pdf_bytes = pdfkit.from_string(html, False, configuration=config)
+
+    return pdf_bytes

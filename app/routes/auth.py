@@ -1,11 +1,11 @@
-from flask import Blueprint, render_template, flash, redirect, url_for, session
+from flask import Blueprint, render_template, flash, redirect, url_for
 from flask_login import login_user, current_user, login_required, logout_user
 from app.extensions import login_manager, db, safe_commit
-from app.models import User, Cart,CartItem
+from app.models import User
 from app.forms import RegisterForm, LoginForm
 from werkzeug.security import generate_password_hash, check_password_hash
-from app.utils.cart import get_user_cart_cached, merge_session_basket_to_cart
-from datetime import datetime, timezone
+from app.utils.cart import merge_session_basket_to_cart
+
 # User loader
 @login_manager.user_loader
 def load_user(user_id):

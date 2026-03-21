@@ -1,8 +1,8 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, make_response
 from flask_login import login_required, current_user
 from app.utils.auth import internal_required
 from app.models import Orders
-from app.services.invoice_service import serialize_order
+from app.services.invoice_service import serialize_order, generate_invoice_pdf
 
 order_bp = Blueprint('orders', __name__, url_prefix='/orders')
 
@@ -26,3 +26,14 @@ def internal_invoice(order_id):
 def internal_invoice_json(order_id):
     order = Orders.query.filter_by(order_id=order_id).first_or_404()
     return jsonify(serialize_order(order, request.url_root))
+
+
+@order_bp.route('/invoice/<order_id>/download')
+@login_required
+def download_invoice(order_id):
+    order = Orders.query.filter_by(order_id=order_id, user_id=current_user.id).first_or_404()
+    pdf_bytes = generate_invoice_pdf(order)
+    response = make_response(pdf_bytes)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=invoice_{order.order_id}.pdf'
+    return response

@@ -1,3 +1,9 @@
+from flask import render_template, current_app
+import io
+from xhtml2pdf import pisa
+import os
+
+
 def serialize_order(order, url_root):
     return {
         "order_id": order.order_id,
@@ -30,3 +36,20 @@ def serialize_order(order, url_root):
             for item in order.order_items
         ]
     }
+
+
+def link_callback(uri, rel):
+    # Convert /static/... to the real filesystem path
+    if uri.startswith('/static/'):
+        path = os.path.join(current_app.root_path, uri[1:])
+        return path
+    return uri
+
+
+def generate_invoice_pdf(order):
+    html = render_template('orders/invoice.html', order=order)
+    result = io.BytesIO()
+    pisa_status = pisa.CreatePDF(html, dest=result, link_callback=link_callback)
+    if pisa_status.err:
+        raise Exception("PDF generation failed")
+    return result.getvalue()

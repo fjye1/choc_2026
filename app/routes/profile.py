@@ -6,7 +6,7 @@ from app.forms import AddAddress
 from app.utils.functions import can_deliver_to
 from app.extensions import safe_commit, db
 
-profile_bp = Blueprint("profile",__name__,template_folder="templates")
+profile_bp = Blueprint("profile", __name__, url_prefix="/profile")
 
 @profile_bp.route("/profile")
 @login_required

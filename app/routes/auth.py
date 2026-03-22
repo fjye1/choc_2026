@@ -12,7 +12,7 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 # Blueprint
-auth_bp = Blueprint('auth', __name__, template_folder='templates/auth')
+auth_bp    = Blueprint("auth", __name__, url_prefix="/auth")
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():

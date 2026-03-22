@@ -5,7 +5,7 @@ from app.models import Orders
 from app.services.invoice_service import serialize_order, generate_invoice_pdf
 from app.utils.auth import internal_required
 
-order_bp = Blueprint('orders', __name__, url_prefix='/orders')
+order_bp  = Blueprint("orders", __name__, url_prefix="/orders")
 
 
 @order_bp.route('/invoice/<string:order_id>')

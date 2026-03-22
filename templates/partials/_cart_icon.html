@@ -1,5 +1,4 @@
-<!--TODO replace this with the route for Cart-->
-<a href="{{ url_for('auth.login') }}" class="nav-link px-2 position-relative">
+<a href="{{ url_for('cart.view_cart') }}" class="nav-link px-2 position-relative">
   <img src="{{ url_for('static', filename='images/cart.svg') }}"
        alt="Cart" width="30" class="product-img"
        style="filter: {% if cart_items|length > 0 %}invert(34%) sepia(77%) saturate(545%) hue-rotate(97deg) brightness(95%) contrast(92%){% else %}none{% endif %};">

@@ -6,7 +6,8 @@
 {% if items %}
 <ul style="list-style: none; padding: 0;">
     {% for item in items %}
-    <li style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;" data-product-id="{{ item.product.id }}">
+    <li style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;"
+        data-product-id="{{ item.product.id }}">
         <img src="/{{ item.product.image }}" alt="{{ item.product.name }}"
              style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px;">
 
@@ -17,7 +18,10 @@
         <span class="line-total">₹{{ '%.2f' % (item.price * item.quantity) }}</span>
 
         {% if item.cart_item_id %}
-        <form action="{{ url_for('remove_cart_item', item_id=item.cart_item_id) }}" method="POST" style="display:inline;">
+        <form action="{{ url_for('cart.remove_cart_item', item_id=item.cart_item_id) }}" method="POST"
+              style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
             <button type="submit" class="btn btn-sm btn-danger" style="padding: 0 6px; font-weight: bold;">X</button>
         </form>
         {% endif %}

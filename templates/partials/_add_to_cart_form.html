@@ -1,7 +1,7 @@
 <!-- _add_to_cart_form.html -->
 {% if next_box %}
-<!--            TODO replace this with the add to card button-->
-<form method="POST" action="{{ url_for('admin.admin_test') }}">
+
+<form method="POST" action="{{ url_for('cart.add_to_cart') }}">
     {{ add_to_cart_form.hidden_tag() }}
     {{ add_to_cart_form.product_id(value=product.id) }}
     {{ add_to_cart_form.box_id(value=next_box.id) }}

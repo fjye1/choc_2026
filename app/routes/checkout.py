@@ -1,9 +1,10 @@
-from flask import Blueprint, render_template, flash, redirect, url_for, jsonify
+from flask import Blueprint, render_template, flash, redirect, url_for, jsonify, request
 from flask_login import login_required, current_user
 import stripe
 from app.services.cart_service import get_cart_for_user
 from app.utils.cart import get_user_cart_cached
 from app.services.checkout_service import calculate_order_totals, get_payment_amount, format_cart_for_json, build_payment_metadata
+from app.services.order_service import get_or_create_order
 import os
 
 stripe.api_key = os.getenv("STRIPE_API_KEY")  # 🔑 secret key
@@ -74,3 +75,23 @@ def create_payment_intent():
 
     # success
     return jsonify({'clientSecret': intent.client_secret})
+
+@checkout_bp.route('/success')
+@login_required
+def payment_success():
+    payment_intent_id = request.args.get("payment_intent")
+    if not payment_intent_id:
+        flash("Payment info missing.", "danger")
+        return redirect(url_for('home.index'))
+
+    order, message, _ = get_or_create_order(payment_intent_id, current_user.id)
+    if not order:
+        flash(message, "danger")
+        return redirect(url_for('payment_failure'))
+
+    flash(message, "success")
+    return render_template('checkout/payment_success.html', order=order)
+
+@checkout_bp.route('/failure')
+def payment_failure():
+    return render_template('checkout/payment_failure.html')

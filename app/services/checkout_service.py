@@ -1,6 +1,10 @@
 import json
 from app.services.cart_service import serialize_cart
 from app.utils.functions import SHIPPING_FEE, SHIPPING_FREE_THRESHOLD, CARD_FEE_FIXED, CARD_FEE_PERCENT
+import stripe
+from app.models import Cart, Address, Orders, OrderItem, Tasks
+from app.extensions import safe_commit, db
+from datetime import datetime, timezone
 
 
 def calculate_order_totals(cart_items):
@@ -69,3 +73,83 @@ def get_payment_amount(cart):
     """Return total amount in smallest currency unit (paise) for Stripe."""
     totals = calculate_order_totals(cart.items)
     return int(round(float(totals["grand_total"]) * 100))
+
+
+def process_paid_order(payment_intent_id: str, user_id: int):
+    """Create an order from a Stripe PaymentIntent and the user's cart."""
+    try:
+        intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+        if intent.status != "succeeded":
+            return None, "Payment not completed"
+
+        cart = Cart.query.filter_by(user_id=user_id).first()
+        if not cart or not cart.items:
+            return None, "Cart is empty"
+
+        shipping_address = Address.query.filter_by(user_id=user_id, current_address=True).first()
+        billing_address = Address.query.filter_by(user_id=user_id, current_address=True).first()
+        if not shipping_address or not billing_address:
+            return None, "Missing address info"
+
+        existing_order = Orders.query.filter_by(payment_intent_id=payment_intent_id).first()
+        if existing_order:
+            return existing_order, None
+
+        order_id = f"ORD{int(datetime.now(timezone.utc).timestamp())}"
+        totals = calculate_order_totals(cart.items)
+        payment_method = "live" if intent.livemode else "test"
+
+        order = Orders(
+            order_id=order_id,
+            user_id=user_id,
+            status="paid",
+            subtotal=totals["subtotal"],
+            shipping=totals["shipping"],
+            card_fee=totals["card_fee"],
+            total_amount=totals["grand_total"],
+            payment_method=payment_method,
+            payment_intent_id=payment_intent_id,
+            shipping_address=shipping_address,
+            billing_address=billing_address
+        )
+        db.session.add(order)
+
+        for item in cart.items:
+            order_item = OrderItem(
+                order=order,
+                product_id=item.product_id,
+                box_id=item.box_id,
+                shipment_id=item.shipment_id,
+                quantity=item.quantity,
+                price_at_purchase=float(item.price)
+            )
+            db.session.add(order_item)
+
+            if item.box:
+                item.box.sold_today = (item.box.sold_today or 0) + item.quantity
+                item.box.quantity -= item.quantity
+                if item.box.quantity <= 0:
+                    item.box.is_active = False
+
+        for item in cart.items:
+            db.session.delete(item)
+
+        safe_commit()
+
+        try:
+            new_task = Tasks(
+                task_name="send_invoice",
+                arg1=order.order_id,
+                arg2=order.user.email
+            )
+            db.session.add(new_task)
+            safe_commit()
+        except Exception as e:
+            print(f"[Invoice Queue Error]: {e}")
+
+        return order, None
+
+    except Exception as e:
+        print(f"[Order Processing Error]: {e}")
+        db.session.rollback()
+        return None, str(e)

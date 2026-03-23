@@ -1,0 +1,115 @@
+/* Checkout Page CSS */
+
+.checkout-container {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Products section */
+.checkout-products {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.checkout-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.checkout-item-img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.checkout-item-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.checkout-item-name {
+  font-weight: bold;
+  margin: 0;
+}
+
+.checkout-item-quantity {
+  font-size: 14px;
+  color: #555;
+  margin: 0;
+}
+
+.checkout-item-price {
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+/* Totals section */
+.checkout-totals {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: #e6f7ff;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.totals-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.totals-grand {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* Payment form */
+.payment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+#payment-element {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+}
+
+#payment-message {
+  color: red;
+  min-height: 20px;
+}
+
+#submit {
+  align-self: flex-end;
+  padding: 10px 20px;
+  font-size: 16px;
+}
+
+/* Shipping address */
+.checkout-address {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.checkout-address p {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+}

@@ -4,6 +4,9 @@ import stripe
 from app.services.cart_service import get_cart_for_user
 from app.utils.cart import get_user_cart_cached
 from app.services.checkout_service import calculate_order_totals, get_payment_amount, format_cart_for_json, build_payment_metadata
+import os
+
+stripe.api_key = os.getenv("STRIPE_API_KEY")  # 🔑 secret key
 
 checkout_bp = Blueprint("checkout", __name__, url_prefix="/checkout")
 
@@ -46,15 +49,28 @@ def cart_data():
 @login_required
 def create_payment_intent():
     cart = get_cart_for_user(current_user.id)
+
     if not cart or not cart.items:
         return jsonify({'error': 'Cart is empty'}), 400
 
+    # get total amount to charge (in paise)
     amount = get_payment_amount(cart)
-    intent = stripe.PaymentIntent.create(
-        amount=amount,
-        currency='inr',
-        metadata=build_payment_metadata(current_user.id, cart),
-        automatic_payment_methods={'enabled': True}
-    )
+    if not amount or amount <= 0:
+        return jsonify({'error': 'Invalid payment amount'}), 400
 
+    try:
+        intent = stripe.PaymentIntent.create(
+            amount=amount,
+            currency='inr',
+            metadata=build_payment_metadata(current_user.id, cart),
+            automatic_payment_methods={'enabled': True}
+        )
+    except stripe.error.StripeError as e:
+        print("Stripe error:", e.user_message or str(e))
+        return jsonify({'error': e.user_message or "Stripe error"}), 400
+    except Exception as e:
+        print("Server error:", str(e))
+        return jsonify({'error': "Server error creating PaymentIntent"}), 500
+
+    # success
     return jsonify({'clientSecret': intent.client_secret})

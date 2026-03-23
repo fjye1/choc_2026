@@ -3,6 +3,7 @@ from .extensions import db, login_manager
 from .context_injectors import inject_globals, inject_dummy_products, inject_top_tags, inject_cart_items
 from app.utils.gravatar import gravatar_url
 from flask_wtf import CSRFProtect
+from app.routes.checkout import stripe_webhook
 
 csrf = CSRFProtect()  # just create it here
 
@@ -15,6 +16,7 @@ def create_app():
     app.config.from_object("config.Config")
 
     csrf.init_app(app)
+    csrf.exempt(stripe_webhook)
     db.init_app(app)
     login_manager.init_app(app)  # <-- here
     app.jinja_env.filters['gravatar'] = gravatar_url

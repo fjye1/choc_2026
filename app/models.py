@@ -355,6 +355,19 @@ class Orders(db.Model):
             return f"{hours}h"
         return None
 
+    @property
+    def elapsed_time(self):
+        """Time elapsed since order_date, as days + hours"""
+        if self.order_date:
+            delta = datetime.now(timezone.utc) - self.order_date
+            days = delta.days
+            hours = delta.seconds // 3600
+
+            if days > 0:
+                return f"{days}d {hours}h"
+            return f"{hours}h"
+        return None
+
 
 class OrderItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)

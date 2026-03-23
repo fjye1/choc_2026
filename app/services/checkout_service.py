@@ -5,7 +5,7 @@ import stripe
 from app.models import Cart, Address, Orders, OrderItem, Tasks
 from app.extensions import safe_commit, db
 from datetime import datetime, timezone
-
+from sqlalchemy.exc import IntegrityError
 
 def calculate_order_totals(cart_items):
     subtotal = 0
@@ -78,64 +78,73 @@ def get_payment_amount(cart):
 def process_paid_order(payment_intent_id: str, user_id: int):
     """Create an order from a Stripe PaymentIntent and the user's cart."""
     try:
-        intent = stripe.PaymentIntent.retrieve(payment_intent_id)
-        if intent.status != "succeeded":
-            return None, "Payment not completed"
+        with db.session.no_autoflush:  # 👈 prevents autoflush during queries
+            existing_order = Orders.query.filter_by(payment_intent_id=payment_intent_id).first()
+            if existing_order:
+                print(f"[Order] Already processed {payment_intent_id}, skipping")
+                return existing_order, None
 
-        cart = Cart.query.filter_by(user_id=user_id).first()
-        if not cart or not cart.items:
-            return None, "Cart is empty"
+            intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+            if intent.status != "succeeded":
+                return None, "Payment not completed"
 
-        shipping_address = Address.query.filter_by(user_id=user_id, current_address=True).first()
-        billing_address = Address.query.filter_by(user_id=user_id, current_address=True).first()
-        if not shipping_address or not billing_address:
-            return None, "Missing address info"
+            cart = Cart.query.filter_by(user_id=user_id).first()
+            if not cart or not cart.items:
+                return None, "Cart is empty"
 
-        existing_order = Orders.query.filter_by(payment_intent_id=payment_intent_id).first()
-        if existing_order:
-            return existing_order, None
+            shipping_address = Address.query.filter_by(user_id=user_id, current_address=True).first()
+            billing_address = Address.query.filter_by(user_id=user_id, current_address=True).first()
+            if not shipping_address or not billing_address:
+                return None, "Missing address info"
 
-        order_id = f"ORD{int(datetime.now(timezone.utc).timestamp())}"
-        totals = calculate_order_totals(cart.items)
-        payment_method = "live" if intent.livemode else "test"
+            order_id = f"ORD{int(datetime.now(timezone.utc).timestamp())}"
+            totals = calculate_order_totals(cart.items)
+            payment_method = "live" if intent.livemode else "test"
 
-        order = Orders(
-            order_id=order_id,
-            user_id=user_id,
-            order_date=datetime.now(timezone.utc),
-            status="paid",
-            subtotal=totals["subtotal"],
-            shipping=totals["shipping"],
-            card_fee=totals["card_fee"],
-            total_amount=totals["grand_total"],
-            payment_method=payment_method,
-            payment_intent_id=payment_intent_id,
-            shipping_address=shipping_address,
-            billing_address=billing_address
-        )
-        db.session.add(order)
-
-        for item in cart.items:
-            order_item = OrderItem(
-                order=order,
-                product_id=item.product_id,
-                box_id=item.box_id,
-                shipment_id=item.shipment_id,
-                quantity=item.quantity,
-                price_at_purchase=float(item.price)
+            order = Orders(
+                order_id=order_id,
+                user_id=user_id,
+                order_date=datetime.now(timezone.utc),
+                status="paid",
+                subtotal=totals["subtotal"],
+                shipping=totals["shipping"],
+                card_fee=totals["card_fee"],
+                total_amount=totals["grand_total"],
+                payment_method=payment_method,
+                payment_intent_id=payment_intent_id,
+                shipping_address=shipping_address,
+                billing_address=billing_address
             )
-            db.session.add(order_item)
+            db.session.add(order)
 
-            if item.box:
-                item.box.sold_today = (item.box.sold_today or 0) + item.quantity
-                item.box.quantity -= item.quantity
-                if item.box.quantity <= 0:
-                    item.box.is_active = False
+            for item in cart.items:
+                order_item = OrderItem(
+                    order=order,
+                    product_id=item.product_id,
+                    box_id=item.box_id,
+                    shipment_id=item.shipment_id,
+                    quantity=item.quantity,
+                    price_at_purchase=float(item.price)
+                )
+                db.session.add(order_item)
 
-        for item in cart.items:
-            db.session.delete(item)
+                if item.box:
+                    item.box.sold_today = (item.box.sold_today or 0) + item.quantity
+                    item.box.quantity -= item.quantity
+                    if item.box.quantity <= 0:
+                        item.box.is_active = False
 
-        safe_commit()
+            for item in cart.items:
+                db.session.delete(item)
+
+        # Commit outside no_autoflush block
+        try:
+            safe_commit()
+        except IntegrityError:
+            db.session.rollback()
+            existing_order = Orders.query.filter_by(payment_intent_id=payment_intent_id).first()
+            print(f"[Order] Race condition caught for {payment_intent_id}, returning existing order")
+            return existing_order, None
 
         try:
             new_task = Tasks(
@@ -149,6 +158,12 @@ def process_paid_order(payment_intent_id: str, user_id: int):
             print(f"[Invoice Queue Error]: {e}")
 
         return order, None
+
+    except IntegrityError as e:  # 👈 catch race condition at outer level too
+        db.session.rollback()
+        existing_order = Orders.query.filter_by(payment_intent_id=payment_intent_id).first()
+        print(f"[Order] Race condition caught (outer) for {payment_intent_id}")
+        return existing_order, None
 
     except Exception as e:
         print(f"[Order Processing Error]: {e}")

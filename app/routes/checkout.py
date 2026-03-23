@@ -5,6 +5,7 @@ from app.services.cart_service import get_cart_for_user
 from app.utils.cart import get_user_cart_cached
 from app.services.checkout_service import calculate_order_totals, get_payment_amount, format_cart_for_json, \
     build_payment_metadata, process_paid_order
+from app.services.notifications import send_discord_order_notification
 from app.services.order_service import get_or_create_order
 from config import Config
 
@@ -103,18 +104,19 @@ def stripe_webhook():
     payload = request.data
     sig_header = request.headers.get('Stripe-Signature')
     endpoint_secret = current_app.config.get("ENDPOINT_SECRET")
-
-    # Verify webhook signature
+    print(f"[Webhook] Secret loaded: {endpoint_secret[:10] if endpoint_secret else 'NONE'}")  # 👈
+    print(f"[Webhook] Sig header present: {bool(sig_header)}")  # 👈
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
-    except ValueError:
+    except ValueError as e:
+        print(f"[Webhook] Invalid payload: {e}")  # 👈
         print("[Webhook] Invalid payload")
         return 'Invalid payload', 400
-    except stripe.error.SignatureVerificationError:
+    except stripe.error.SignatureVerificationError as e:
+        print(f"[Webhook] Invalid signature: {e}")  # 👈
         print("[Webhook] Invalid signature")
         return 'Invalid signature', 400
 
-    # Handle payment success
     if event['type'] == 'payment_intent.succeeded':
         payment_intent = event['data']['object']
         payment_intent_id = payment_intent['id']
@@ -130,8 +132,9 @@ def stripe_webhook():
 
         if error:
             print(f"[Webhook] Error processing order: {error}")
-            # Return 200 anyway—Stripe will retry automatically
         else:
-            print(f"[Webhook] Order {order.order_id} created successfully")
+            print(f"[Discord] Sending notification for order {order.order_id}")
+            send_discord_order_notification(order)
+            print(f"[Discord] Notification sent successfully")
 
     return 'Success', 200

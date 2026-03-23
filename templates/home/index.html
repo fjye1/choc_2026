@@ -40,7 +40,6 @@
         <div class="col-12 col-lg-8 px-3 py-4">
 
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
-                <!--                TODO replace dummy_products with sorted_products-->
                 {% for product in sorted_products[:6] if product.is_active %}
                 {{ product_card(product, user_alerts, current_user) }}
                 {% endfor %}

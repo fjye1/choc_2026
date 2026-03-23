@@ -57,7 +57,7 @@
                     <button class="btn btn-success btn-sm" disabled>Sent</button>
                     {% else %}
                     <!--                        TODO add route for ('admin.add_tracking', order_id=order.order_id)-->
-                    <a href="{{ url_for('admin.dashboard') }}"
+                    <a href="{{ url_for('admin.add_tracking', order_id=order.order_id) }}"
                        class="btn btn-danger btn-sm">Add Tracking</a>
                     {% endif %}
                 </td>

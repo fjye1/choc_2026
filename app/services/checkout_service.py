@@ -102,6 +102,7 @@ def process_paid_order(payment_intent_id: str, user_id: int):
         order = Orders(
             order_id=order_id,
             user_id=user_id,
+            order_date=datetime.now(timezone.utc),
             status="paid",
             subtotal=totals["subtotal"],
             shipping=totals["shipping"],

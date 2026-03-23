@@ -5,13 +5,13 @@ from app.services.product_service import get_admin_product_data
 from app.services.cart_service import get_admin_cart
 from datetime import date, timedelta
 from app.services.product_service import ProductService
-from app.services.order_service import get_unfulfilled_orders
+from app.services.order_service import get_unfulfilled_orders, add_tracking_to_order
 from app.services.sales_service import get_sales_last_n_days
 from app.services.user_service import get_admin_user_data
 from app.services.shipment_service import get_all_shipments_admin, add_box_to_shipment
 from app.utils.chart_utils import format_sales_for_chart
 from app.utils.images import save_product_image
-from app.forms import ShipmentSentForm, BoxForm, ProductForm
+from app.forms import ShipmentSentForm, BoxForm, ProductForm, TrackingForm
 from app.models import Shipment, Product, Box, Orders
 from app.extensions import db, safe_commit
 from slugify import slugify
@@ -268,7 +268,18 @@ def settings():
 def support():
     return render_template("admin/support.html")
 
-# @main_bp.route("/cart", methods=["GET", "POST"])
-# def user_cart():
-#     items, total = get_user_cart(current_user if current_user.is_authenticated else None)
-#     return render_template("cart.html", items=items, total=total)
+@admin_bp.route('/order/<string:order_id>/add-tracking', methods=['GET', 'POST'])
+@login_required
+@admin_only
+def add_tracking(order_id):
+    order = db.get_or_404(Orders, order_id)
+    form = TrackingForm()
+
+    if form.validate_on_submit():
+        add_tracking_to_order(order_id, form.tracking_code.data)
+
+        flash("Tracking number added and task queued for sending email.", "success")
+        return redirect(url_for('admin.dashboard'))
+
+    return render_template('admin/add_tracking.html', form=form, order=order)
+

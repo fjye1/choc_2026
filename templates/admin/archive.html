@@ -18,6 +18,8 @@
                     <th>Status</th>
                     <th>View</th>
                     <th>Tracking</th>
+                    <th>Sent On</th>
+                    <th>Processing time</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -29,7 +31,6 @@
                     <td>{{ "%.2f"|format(order.total_amount) }}</td>
                     <td>{{ order.status }}</td>
                     <td>
-
                         <a href="{{ url_for('orders.invoice', order_id=order.order_id) }}"
                            class="btn btn-sm btn-primary">View</a>
                     </td>
@@ -38,6 +39,8 @@
                         <button class="btn btn-success btn-sm" disabled>Sent</button>
 
                     </td>
+                    <td>{{ order.updated_at.strftime("%Y-%m-%d %H:%M") }}</td>
+                    <td>{{ order.processing_time }}</td>
                 </tr>
                 {% endfor %}
                 </tbody>

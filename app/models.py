@@ -324,7 +324,7 @@ class Orders(db.Model):
     order_id = db.Column(db.String(20), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', backref='orders')
-    order_date = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    order_date = db.Column(db.DateTime(timezone=True))  # when payment confirmed
     status = db.Column(db.String(20), default='pending')
     total_amount = db.Column(db.Float, nullable=False)
     subtotal = db.Column(db.Float, default=0)
@@ -338,9 +338,22 @@ class Orders(db.Model):
     billing_address = db.relationship('Address', foreign_keys=[billing_address_id])
     tracking_number = db.Column(db.String(50))
     created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    updated_at = db.Column(db.DateTime, onupdate=func.now())
+    updated_at = db.Column(db.DateTime(timezone=True), onupdate=lambda: datetime.now(timezone.utc))
     payment_intent_id = db.Column(db.String(255), unique=True, nullable=True)
     invoice_path = db.Column(db.String(255), nullable=True)
+
+    @property
+    def processing_time(self):
+        if self.updated_at and self.order_date:
+            delta = self.updated_at - self.order_date
+
+            days = delta.days
+            hours = delta.seconds // 3600
+
+            if days > 0:
+                return f"{days}d {hours}h"
+            return f"{hours}h"
+        return None
 
 
 class OrderItem(db.Model):

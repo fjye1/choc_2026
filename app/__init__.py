@@ -1,6 +1,6 @@
 from flask import Flask
 from .extensions import db, login_manager
-from .context_injectors import inject_globals, inject_dummy_products, inject_top_tags
+from .context_injectors import inject_globals, inject_dummy_products, inject_top_tags, inject_cart_items
 from app.utils.gravatar import gravatar_url
 from flask_wtf import CSRFProtect
 
@@ -43,6 +43,7 @@ def create_app():
 
 
     app.context_processor(inject_top_tags)
+    app.context_processor(inject_cart_items) # so the cart icon changes if items in it
 
 
     return app

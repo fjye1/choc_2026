@@ -1,6 +1,10 @@
 from flask import g
 from app.models import Product
 from collections import Counter
+from flask_login import current_user
+
+from app.services.cart_service import get_user_cart
+
 
 def inject_globals():
     """
@@ -68,3 +72,14 @@ def inject_top_tags():
     right_tags = top_six[3:]
 
     return dict(left_tags=left_tags, right_tags=right_tags)
+
+# Add cart items to the context so that the cart icon can highlight if items in the cart
+def inject_cart_items():
+    items = []
+    if current_user.is_authenticated:
+        items, _ = get_user_cart(current_user)  # returns (items, total)
+    else:
+        from flask import session
+        basket = session.get("basket", [])
+        items = basket
+    return dict(cart_items=items)

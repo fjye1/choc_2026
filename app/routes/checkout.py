@@ -1,13 +1,15 @@
-from flask import Blueprint, render_template, flash, redirect, url_for, jsonify, request
+from flask import Blueprint, render_template, flash, redirect, url_for, jsonify, request, current_app
 from flask_login import login_required, current_user
 import stripe
 from app.services.cart_service import get_cart_for_user
 from app.utils.cart import get_user_cart_cached
-from app.services.checkout_service import calculate_order_totals, get_payment_amount, format_cart_for_json, build_payment_metadata
+from app.services.checkout_service import calculate_order_totals, get_payment_amount, format_cart_for_json, \
+    build_payment_metadata, process_paid_order
 from app.services.order_service import get_or_create_order
-import os
+from config import Config
 
-stripe.api_key = os.getenv("STRIPE_API_KEY")  # 🔑 secret key
+
+stripe.api_key = Config.STRIPE_API_KEY
 
 checkout_bp = Blueprint("checkout", __name__, url_prefix="/checkout")
 
@@ -95,3 +97,41 @@ def payment_success():
 @checkout_bp.route('/failure')
 def payment_failure():
     return render_template('checkout/payment_failure.html')
+
+@checkout_bp.route('/webhook', methods=['POST'])
+def stripe_webhook():
+    payload = request.data
+    sig_header = request.headers.get('Stripe-Signature')
+    endpoint_secret = current_app.config.get("ENDPOINT_SECRET")
+
+    # Verify webhook signature
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+    except ValueError:
+        print("[Webhook] Invalid payload")
+        return 'Invalid payload', 400
+    except stripe.error.SignatureVerificationError:
+        print("[Webhook] Invalid signature")
+        return 'Invalid signature', 400
+
+    # Handle payment success
+    if event['type'] == 'payment_intent.succeeded':
+        payment_intent = event['data']['object']
+        payment_intent_id = payment_intent['id']
+        user_id = payment_intent.get('metadata', {}).get('user_id')
+
+        if not user_id:
+            print(f"[Webhook] Missing user_id for payment_intent {payment_intent_id}")
+            return 'Missing user_id', 400
+
+        print(f"[Webhook] Processing order for payment_intent {payment_intent_id}, user {user_id}")
+
+        order, error = process_paid_order(payment_intent_id, int(user_id))
+
+        if error:
+            print(f"[Webhook] Error processing order: {error}")
+            # Return 200 anyway—Stripe will retry automatically
+        else:
+            print(f"[Webhook] Order {order.order_id} created successfully")
+
+    return 'Success', 200

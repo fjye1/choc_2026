@@ -8,11 +8,7 @@
     <a href="{{ url_for('orders.download_invoice', order_id=order.order_id) }}" class="btn btn-outline-primary mt-3">Download Invoice PDF</a>
 
 </div>
-<script>
-// Clean sensitive parameters from URL
-if (window.location.search.includes('payment_intent_client_secret')) {
-    const cleanUrl = window.location.pathname;
-    window.history.replaceState({}, document.title, cleanUrl);
-}
-</script>
+
+
+<script src="{{ url_for('static', filename='js/clean_url.js') }}"></script>
 {% endblock %}

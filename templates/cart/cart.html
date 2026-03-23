@@ -26,10 +26,10 @@
 <strong>Total: ₹{{ '%.2f' % total }}</strong>
 
 {% if current_user.is_authenticated %}
-<!--TODO replace with route to checkout ('checkout')-->
-<form action="{{ url_for('auth.login') }}" method="POST">
-    <button class="btn btn-success">Proceed to Checkout</button>
-</form>
+
+<a href="{{ url_for('checkout.checkout') }}" class="btn btn-success">
+    Proceed to Checkout
+</a>
 {% else %}
 <p>
     <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Create an account to checkout</a>

@@ -52,3 +52,5 @@ def build_price_groups(boxes):
         groups[box.price_inr_unit]["quantity"] += box.quantity
     return groups
 
+
+

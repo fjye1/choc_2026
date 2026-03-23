@@ -149,3 +149,29 @@ def remove_item_from_cart(item_id, user_id):
     safe_commit()
 
     return f"Item '{product_name}' removed from cart."
+
+
+def get_cart_for_user(user_id):
+    """Fetch the cart for a user. Returns None if empty."""
+    return get_user_cart_cached(user_id)
+
+
+def serialize_cart(cart):
+    """Convert a cart into JSON-serializable format for Stripe or frontend."""
+    if not cart or not cart.items:
+        return {'items': [], 'total': 0}
+
+    items = [
+        {
+            'product_id': item.box.product_id if item.box else None,
+            'box_id': item.box_id,
+            'shipment_id': item.shipment_id,
+            'product_name': item.box.product.name if item.box else None,
+            'quantity': item.quantity,
+            'price': float(item.price),
+            'expiration_date': item.box.expiration_date.strftime('%Y-%m-%d') if item.box else None
+        }
+        for item in cart.items
+    ]
+    total = sum(item['price'] * item['quantity'] for item in items)
+    return {'items': items, 'total': total}

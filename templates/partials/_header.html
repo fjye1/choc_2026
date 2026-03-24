@@ -3,7 +3,7 @@
         <div class="row align-items-center">
 
             <!-- Mobile profile (under lg) -->
-            <div class="col-4 d-lg-none">
+            <div class="col-2 d-lg-none">
                 {% if current_user.is_authenticated %}
                 <a href="{{ url_for('profile.profile') }}">
                     <img src="{{ current_user.email | gravatar }}" alt="Profile" height="34" class="rounded-circle">
@@ -24,37 +24,30 @@
                     </li>
                     {% endif %}
                     {% if not current_user.is_authenticated %}
-                    <li class="nav-item"><a href="{{ url_for('auth.register') }}" class="nav-link px-2 link-secondary">Register</a>
-                    </li>
-                    <li class="nav-item"><a href="{{ url_for('auth.login') }}" class="nav-link px-2 link-body-emphasis">Login</a>
-                    </li>
+                    <li class="nav-item"><a href="{{ url_for('auth.register') }}" class="nav-link px-2 link-secondary">Register</a></li>
+                    <li class="nav-item"><a href="{{ url_for('auth.login') }}" class="nav-link px-2 link-body-emphasis">Login</a></li>
                     {% endif %}
-                    <li class="nav-item"><a href="{{ url_for('home.index') }}" class="nav-link px-2 link-body-emphasis">Home</a>
-                    </li>
-                    <li class="nav-item"><a href="{{ url_for('home.catalog') }}"
-                                            class="nav-link px-2 link-body-emphasis">Products</a></li>
+                    <li class="nav-item"><a href="{{ url_for('home.index') }}" class="nav-link px-2 link-body-emphasis">Home</a></li>
+                    <li class="nav-item"><a href="{{ url_for('home.catalog') }}" class="nav-link px-2 link-body-emphasis">Products</a></li>
                 </ul>
             </div>
 
             <!-- Center logo -->
-            <!-- Logo Animation -->
-            <div class="col-4 col-lg-4 text-center">
+            <div class="col-8 col-lg-4 text-center">
                 <a href="{{ url_for('home.index') }}" class="logo-link">
                     <div id="logo" class="logo"></div>
                 </a>
             </div>
 
             <!-- Right section: desktop search + cart -->
-            <div class="col-4 col-lg-4 text-end d-flex justify-content-end align-items-center gap-2">
+            <div class="col-2 col-lg-4 text-end d-flex justify-content-end align-items-center gap-2">
 
                 <div class="d-none d-lg-flex">
                     {% include 'partials/_search_form.html' %}
                 </div>
 
                 {% include 'partials/_cart_icon.html' %}
-
                 {% include 'partials/_user_dropdown.html' %}
-
 
             </div>
 
@@ -68,7 +61,6 @@
 
         <!-- Desktop categories nav -->
         {% include 'partials/_categories_nav.html' %}
-
 
         <!-- Mobile search (replaces categories nav) -->
         <div class="d-lg-none py-2">

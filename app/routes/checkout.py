@@ -142,4 +142,11 @@ def stripe_webhook():
 
 @checkout_bp.route('/webhook-test', methods=['POST'])
 def stripe_webhook_test():
-    return 'Hello from webhook', 200
+    payload = request.data
+    sig_header = request.headers.get('Stripe-Signature')
+    endpoint_secret = current_app.config.get("ENDPOINT_SECRET")
+
+    return {
+        "secret_loaded": endpoint_secret[:10] if endpoint_secret else "NONE",
+        "sig_header_present": bool(sig_header)
+    }, 200

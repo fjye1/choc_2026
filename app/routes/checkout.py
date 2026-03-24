@@ -138,3 +138,8 @@ def stripe_webhook():
             print(f"[Discord] Notification sent successfully")
 
     return 'Success', 200
+
+
+@checkout_bp.route('/webhook-test', methods=['POST'])
+def stripe_webhook_test():
+    return 'Hello from webhook', 200

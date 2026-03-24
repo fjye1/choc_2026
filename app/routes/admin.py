@@ -8,10 +8,10 @@ from app.services.product_service import ProductService
 from app.services.order_service import get_unfulfilled_orders, add_tracking_to_order
 from app.services.sales_service import get_sales_last_n_days
 from app.services.user_service import get_admin_user_data
-from app.services.shipment_service import get_all_shipments_admin, add_box_to_shipment
+from app.services.shipment_service import get_all_shipments_admin, add_box_to_shipment, process_shipment_arrival
 from app.utils.chart_utils import format_sales_for_chart
 from app.utils.images import save_product_image
-from app.forms import ShipmentSentForm, BoxForm, ProductForm, TrackingForm
+from app.forms import ShipmentSentForm, BoxForm, ProductForm, TrackingForm, ShipmentArrivalForm
 from app.models import Shipment, Product, Box, Orders
 from app.extensions import db, safe_commit
 from slugify import slugify
@@ -164,7 +164,7 @@ def delete_product(product_id):
     product = ProductService.get_product_by_id(product_id)
     if not product:
         flash("Product not found.", "danger")
-        return redirect(url_for('admin.view_products'))
+        return redirect(url_for('admin.view_product'))
 
     if product.order_items:
         # Soft delete if product has been sold
@@ -177,7 +177,7 @@ def delete_product(product_id):
         safe_commit()
         flash(f"Product '{product.name}' was permanently deleted.", "success")
 
-    return redirect(url_for('admin.view_products'))
+    return redirect(url_for('admin.view_product'))
 
 
 @admin_bp.route('/create-product', methods=['GET', 'POST'])
@@ -214,7 +214,7 @@ def create_product():
         safe_commit()
 
         flash("Product created!", "success")
-        return redirect(url_for("admin.view_products"))
+        return redirect(url_for("admin.view_product"))
 
     return render_template('admin/create_product.html', form=form)
 
@@ -245,7 +245,7 @@ def edit_product(product_id):
 
         safe_commit()
 
-        return redirect(url_for("admin.view_products"))
+        return redirect(url_for("admin.view_product"))
 
     return render_template(
         "admin/edit_product.html",
@@ -282,4 +282,18 @@ def add_tracking(order_id):
         return redirect(url_for('admin.dashboard'))
 
     return render_template('admin/add_tracking.html', form=form, order=order)
+
+@admin_bp.route("/shipments/<int:shipment_id>/arrived", methods=["GET", "POST"])
+@login_required
+@admin_only
+def mark_shipment_arrived(shipment_id):
+    shipment = Shipment.query.get_or_404(shipment_id)
+    form = ShipmentArrivalForm()
+
+    if form.validate_on_submit():
+        process_shipment_arrival(shipment, form.tariff_cost.data)
+        flash(f"Shipment #{shipment.id} marked as arrived.", "success")
+        return redirect(url_for("admin.view_shipments"))
+
+    return render_template("admin/shipment_arrival.html", shipment=shipment, form=form)
 

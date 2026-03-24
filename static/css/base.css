@@ -75,3 +75,37 @@ img {
   from { background-position: 0 0; }
   to   { background-position: -2800px 0; }
 }
+
+/* ------------------ Hero images ------------------ */
+.hero-full {
+    width: 100vw;
+    max-width: none;        /* <--- ADD THIS to override the utility style */
+    height: 400px;          /* Changed from max-height to height for consistency */
+    object-fit: cover;
+    display: block;
+
+
+    /* The Breakout Logic */
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%); /* A cleaner way to center 100vw */
+
+    margin-top: -16px;
+}
+
+/* Hide hero below 650px width */
+@media (max-width: 650px) {
+    .hero-full {
+        display: none;
+    }
+}
+
+.full-bleed-left {
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -30vw;
+  margin-right: auto;
+  width: 40vw;
+  max-width: none;
+}

@@ -63,7 +63,7 @@
             <td>{{ box.expiration_date or '-' }}</td>
             <td>
                 {% if box.product.image %}
-                <img src="{{ url_for('static', filename=box.product.image) }}" style="max-width: 80px;">
+                <img src="/{{ box.product.image }}" style="max-width: 80px;">
                 {% endif %}
             </td>
             <td>
